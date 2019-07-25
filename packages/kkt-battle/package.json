@@ -9,7 +9,8 @@
     "bundle": "rollup --config",
     "bundlewatch": "rollup --config -w",
     "dev": "npm run build:watch",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "battle": "node lib/index.js"
   },
   "dependencies": {
     "@babel/cli": "^7.4.4",
