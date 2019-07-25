@@ -1,83 +1,41 @@
 //@flow
-const { once } = require('events');
 
-type Move = 'ahead' | 'rotate-ccw' | 'rotate-cw';
+// $FlowFixMe - events does in fact export once
+import { once } from 'events';
+import { clear, sleep, areEqual } from './util';
+import { initializeField } from './field';
+import * as moves from './moves';
+import { HEADING_ARROWS } from './constants';
 
-type Point = {
-  x: number,
-  y: number,
-  z: number,
-};
+import type { Point, Bot, GameState } from '../types/GameState.types';
+import type { Move } from '../types/Move.types';
 
-type Heading = Point & { c: string };
-
-type Bot = {
-  position: Point,
-  heading: number,
-  strategy: () => Promise<?Move>,
-  color: string,
-};
-
-type GameState = {
-  bots: Array<Bot>,
-  field: Array<Point>,
-};
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const clear = () => process.stdout.write('\u001b[2J\u001b[0;0H');
-
-const addPoints = (a: Point, b: Point): Point => ({
-  x: a.x + b.x,
-  y: a.y + b.y,
-  z: a.z + b.z,
-});
-
-const areEqual = (a: Point, b: Point): boolean =>
-  a.x == b.x && a.y == b.y && a.z == b.z;
-
-const headings: Array<Heading> = [
-  { x: -1, y: 0, z: 1, c: '↖' },
-  { x: -1, y: 1, z: 0, c: '↗' },
-  { x: 0, y: 1, z: -1, c: '→' },
-  { x: 1, y: 0, z: -1, c: '↘' },
-  { x: 1, y: -1, z: 0, c: '↙' },
-  { x: 0, y: -1, z: 1, c: '←' },
-];
+const FIELD_SIZE = 5;
 
 const randomStrategy = async (): Promise<?Move> => {
   const n = Math.random();
   if (n < 0.25) {
-    return 'rotate-cw';
+    return { type: 'rotate', options: { clockwise: true } };
   }
   if (n < 0.5) {
-    return 'rotate-ccw';
+    return { type: 'rotate', options: { clockwise: false } };
   }
-  return 'ahead';
+  return { type: 'ahead' };
 };
 
 const inputStrategy = async (): Promise<?Move> => {
   const [key] = await once(process.stdin, 'data');
 
   if (key === '\u001b[A') {
-    return 'ahead';
+    return { type: 'ahead' };
   }
   if (key === '\u001b[C') {
-    return 'rotate-cw';
+    return { type: 'rotate', options: { clockwise: true } };
   }
   if (key === '\u001b[D') {
-    return 'rotate-ccw';
+    return { type: 'rotate', options: { clockwise: false } };
   }
 };
-
-const field: Array<Point> = [];
-for (let x = -3; x <= 3; x++) {
-  for (let y = Math.max(-3, -3 - x); y <= 3; y++) {
-    const z = 0 - x - y;
-    if (z >= -3 && z <= 3) {
-      field.push({ x, y, z });
-    }
-  }
-}
 
 const bots: Array<Bot> = [];
 
@@ -96,16 +54,16 @@ bots.push({
 });
 
 const state: GameState = {
-  field,
+  field: initializeField(FIELD_SIZE),
   bots,
 };
 
 const displayPoint = (p: Point, state: GameState): string => {
   const { bots = [] } = state;
-  return bots.reduce((current, bot) => {
+  return bots.reduce((current, bot: Bot) => {
     const { position, heading, color } = bot;
     if (areEqual(p, position)) {
-      const { c } = headings[heading];
+      const c = HEADING_ARROWS[heading];
       return color + c + '\x1b[0m';
     } else {
       return current;
@@ -115,9 +73,10 @@ const displayPoint = (p: Point, state: GameState): string => {
 
 const displayField = (state: GameState) => {
   const { field } = state;
-  for (let x = -3; x <= 3; x++) {
+  const fieldSize = (3 + Math.sqrt(9 + 12 * (field.length - 1))) / 6;
+  for (let x = -1 * (fieldSize - 1); x < fieldSize; x++) {
     const row = field.filter((p) => p.x === x) || [];
-    const spaces = 6 + row[0].y - row[0].z;
+    const spaces = (fieldSize - 1) * 2 + row[0].y - row[0].z;
     process.stdout.write(
       ' '.repeat(spaces) +
         row.map((p) => displayPoint(p, state)).join(' ') +
@@ -126,31 +85,18 @@ const displayField = (state: GameState) => {
   }
 };
 
-const applyMove = (bot: Bot, move: ?Move, _state_: GameState): void => {
-  switch (move) {
-    case 'ahead': {
-      const newPosition = addPoints(bot.position, headings[bot.heading]);
-      if (
-        field.find((p) => areEqual(p, newPosition)) &&
-        !bots.find((otherBot) => areEqual(otherBot.position, newPosition))
-      ) {
-        bot.position = newPosition;
-      }
-      break;
-    }
-    case 'rotate-cw': {
-      bot.heading = (bot.heading + 1) % 6;
-      break;
-    }
-    case 'rotate-ccw': {
-      bot.heading = (bot.heading + 5) % 6;
-      break;
-    }
+const applyMove = (bot: Bot, move: ?Move, state: GameState): void => {
+  const { type, options } = move || {};
+  if (type && Object.keys(moves).includes(type)) {
+    const moveFunction = moves[type];
+    // $FlowFixMe - The options will be the right type, but flow can't tell that
+    moveFunction(bot, state, options);
   }
 };
 
 let keepRunning = true;
 process.stdin.resume();
+// $FlowFixMe - this works
 process.stdin.setRawMode(true);
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (key: string) => {
@@ -179,6 +125,7 @@ process.stdin.on('data', (key: string) => {
       await sleep(100);
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err);
   } finally {
     process.exit();
