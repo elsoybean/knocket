@@ -16,6 +16,7 @@ export type Bot = {
   strategy: () => Promise<?Move>,
   color: string,
   cooldown: number,
+  health: number,
 };
 
 export type BotConfig = {

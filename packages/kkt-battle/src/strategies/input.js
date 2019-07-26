@@ -19,6 +19,9 @@ const input = ({
   if (command === 'ahead') {
     return { type: 'ahead' };
   }
+  if (command === 'attack') {
+    return { type: 'attack' };
+  }
   if (command === 'rotate') {
     const [clockwise]: [boolean] = options;
     return { type: 'rotate', options: { clockwise } };

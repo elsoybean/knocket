@@ -52,17 +52,26 @@ const battle = async (
     await render(state);
 
     const { bots } = state;
-    const activeBot = bots.sort((a, b) => a.cooldown - b.cooldown)[0];
-    const { cooldown: elapsed } = activeBot;
-    bots.forEach((bot) => {
-      bot.cooldown -= elapsed;
-    });
-    const { strategy } = activeBot;
-    const move = await strategy();
-    await applyMove(activeBot, move, state);
+    const aliveBots = bots.filter((bot) => bot.health > 0);
+    if (aliveBots.length == 1) {
+      const { color: winner } = aliveBots[0];
+      events.emit('win', winner);
+      keepRunning = false;
+    } else {
+      const activeBot = bots.sort((a, b) => a.cooldown - b.cooldown)[0];
+      const { cooldown: elapsed } = activeBot;
+      bots.forEach((bot) => {
+        bot.cooldown -= elapsed;
+      });
+      const { strategy } = activeBot;
+      const move = await strategy();
+      await applyMove(activeBot, move, state);
+    }
 
     // TODO: Move to presentation callback
-    await sleep(100);
+    if (keepRunning) {
+      await sleep(100);
+    }
   }
 };
 

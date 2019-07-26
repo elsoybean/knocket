@@ -11,8 +11,9 @@ const ahead = async (
   state: GameState,
   _options_?: AheadOptions,
 ): Promise<number> => {
+  const { position, heading } = bot;
   const { field, bots } = state;
-  const newPosition = addPoints(bot.position, HEADINGS[bot.heading]);
+  const newPosition = addPoints(position, HEADINGS[heading]);
   if (
     field.find((p) => areEqual(p, newPosition)) &&
     !bots.find((otherBot) => areEqual(otherBot.position, newPosition))

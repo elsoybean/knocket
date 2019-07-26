@@ -57,11 +57,18 @@ process.stdin.on('data', (key: string) => {
     events.emit('input', 'quit');
   } else if (key === '\u001b[A') {
     events.emit('input', 'ahead');
+  } else if (key === ' ') {
+    events.emit('input', 'attack');
   } else if (key === '\u001b[C') {
     events.emit('input', 'rotate', true);
   } else if (key === '\u001b[D') {
     events.emit('input', 'rotate', false);
   }
+});
+
+events.on('win', (winner: string) => {
+  // eslint-disable-next-line no-console
+  console.log(winner, 'has won!');
 });
 
 (async () => {
