@@ -16,7 +16,7 @@
         {
             "type": "npm",
             "script": "battle",
-            "path": "packages/kkt-battle/",
+            "path": "packages/kkt-tty/",
             "problemMatcher": [],
             "group": {
                 "kind": "test",

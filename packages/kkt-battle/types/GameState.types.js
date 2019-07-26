@@ -8,16 +8,27 @@ export type Point = {
   z: number,
 };
 
-export type Heading = Point & { c: string };
+export type Heading = Point;
 
 export type Bot = {
   position: Point,
   heading: number,
   strategy: () => Promise<?Move>,
   color: string,
+  cooldown: number,
 };
+
+export type BotConfig = {
+    color: string,
+    strategy: {
+        type: string,
+        options?: Object,
+    }
+};
+
+export type Field = Array<Point>;
 
 export type GameState = {
   bots: Array<Bot>,
-  field: Array<Point>,
+  field: Field,
 };

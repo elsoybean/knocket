@@ -1,133 +1,70 @@
 //@flow
 
-// $FlowFixMe - events does in fact export once
-import { once } from 'events';
-import { clear, sleep, areEqual } from './util';
+import EventEmitter from 'events';
+import { sleep, areEqual } from './util';
 import { initializeField } from './field';
+import { initializeBot } from './bot';
 import * as moves from './moves';
-import { HEADING_ARROWS } from './constants';
 
-import type { Point, Bot, GameState } from '../types/GameState.types';
+import type { Bot, BotConfig, GameState } from '../types/GameState.types';
 import type { Move } from '../types/Move.types';
 
 const FIELD_SIZE = 5;
 
-const randomStrategy = async (): Promise<?Move> => {
-  const n = Math.random();
-  if (n < 0.25) {
-    return { type: 'rotate', options: { clockwise: true } };
-  }
-  if (n < 0.5) {
-    return { type: 'rotate', options: { clockwise: false } };
-  }
-  return { type: 'ahead' };
-};
+const botConfigs: Array<BotConfig> = [
+  { color: 'red', strategy: { type: 'random' } },
+  { color: 'blue', strategy: { type: 'input' } },
+];
 
-const inputStrategy = async (): Promise<?Move> => {
-  const [key] = await once(process.stdin, 'data');
+const battle = async (
+  render: (GameState) => Promise<void>,
+  events: EventEmitter,
+): Promise<void> => {
+  const field = initializeField(FIELD_SIZE);
+  const bots = botConfigs.map((config) => initializeBot(field, config, events));
 
-  if (key === '\u001b[A') {
-    return { type: 'ahead' };
-  }
-  if (key === '\u001b[C') {
-    return { type: 'rotate', options: { clockwise: true } };
-  }
-  if (key === '\u001b[D') {
-    return { type: 'rotate', options: { clockwise: false } };
-  }
-};
+  const state: GameState = {
+    field,
+    bots,
+  };
 
-const bots: Array<Bot> = [];
-
-bots.push({
-  position: { x: -3, y: 0, z: 3 },
-  heading: 3,
-  strategy: randomStrategy,
-  color: '\x1b[31m',
-});
-
-bots.push({
-  position: { x: 3, y: 0, z: -3 },
-  heading: 0,
-  strategy: inputStrategy,
-  color: '\x1b[32m',
-});
-
-const state: GameState = {
-  field: initializeField(FIELD_SIZE),
-  bots,
-};
-
-const displayPoint = (p: Point, state: GameState): string => {
-  const { bots = [] } = state;
-  return bots.reduce((current, bot: Bot) => {
-    const { position, heading, color } = bot;
-    if (areEqual(p, position)) {
-      const c = HEADING_ARROWS[heading];
-      return color + c + '\x1b[0m';
-    } else {
-      return current;
-    }
-  }, '_');
-};
-
-const displayField = (state: GameState) => {
-  const { field } = state;
-  const fieldSize = (3 + Math.sqrt(9 + 12 * (field.length - 1))) / 6;
-  for (let x = -1 * (fieldSize - 1); x < fieldSize; x++) {
-    const row = field.filter((p) => p.x === x) || [];
-    const spaces = (fieldSize - 1) * 2 + row[0].y - row[0].z;
-    process.stdout.write(
-      ' '.repeat(spaces) +
-        row.map((p) => displayPoint(p, state)).join(' ') +
-        '\n',
-    );
-  }
-};
-
-const applyMove = (bot: Bot, move: ?Move, state: GameState): void => {
-  const { type, options } = move || {};
-  if (type && Object.keys(moves).includes(type)) {
-    const moveFunction = moves[type];
+  const applyMove = async (
+    bot: Bot,
+    move: ?Move,
+    state: GameState,
+  ): Promise<void> => {
+    const { type = 'wait', options } = move || {};
+    const moveType = type && Object.keys(moves).includes(type) ? type : 'wait';
+    const moveFunction = moves[moveType];
     // $FlowFixMe - The options will be the right type, but flow can't tell that
-    moveFunction(bot, state, options);
+    bot.cooldown = await moveFunction(bot, state, options);
+  };
+
+  let keepRunning = true;
+
+  events.on('input', (command: string) => {
+    if (command === 'quit') {
+      keepRunning = false;
+    }
+  });
+
+  while (keepRunning) {
+    await render(state);
+
+    const { bots } = state;
+    const activeBot = bots.sort((a, b) => a.cooldown - b.cooldown)[0];
+    const { cooldown: elapsed } = activeBot;
+    bots.forEach((bot) => {
+      bot.cooldown -= elapsed;
+    });
+    const { strategy } = activeBot;
+    const move = await strategy();
+    await applyMove(activeBot, move, state);
+
+    // TODO: Move to presentation callback
+    await sleep(100);
   }
 };
 
-let keepRunning = true;
-process.stdin.resume();
-// $FlowFixMe - this works
-process.stdin.setRawMode(true);
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (key: string) => {
-  if (key == 'q' || key === '\u0003') {
-    keepRunning = false;
-  }
-});
-
-(async () => {
-  try {
-    while (keepRunning) {
-      clear();
-      displayField(state);
-
-      const { bots } = state;
-      await bots.reduce(
-        (chain, bot) =>
-          chain.then(async () => {
-            const { strategy } = bot;
-            const move = await strategy();
-            applyMove(bot, move, state);
-          }),
-        Promise.resolve(),
-      );
-
-      await sleep(100);
-    }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
-  } finally {
-    process.exit();
-  }
-})();
+export default battle;
+export { areEqual };

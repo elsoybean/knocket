@@ -6,7 +6,11 @@ import { HEADINGS } from '../constants';
 import type { Bot, GameState } from '../../types/GameState.types';
 import type { AheadOptions } from '../../types/Move.types';
 
-const ahead = (bot: Bot, state: GameState, _options_?: AheadOptions) => {
+const ahead = async (
+  bot: Bot,
+  state: GameState,
+  _options_?: AheadOptions,
+): Promise<number> => {
   const { field, bots } = state;
   const newPosition = addPoints(bot.position, HEADINGS[bot.heading]);
   if (
@@ -15,6 +19,7 @@ const ahead = (bot: Bot, state: GameState, _options_?: AheadOptions) => {
   ) {
     bot.position = newPosition;
   }
+  return 4 + 2 * Math.random();
 };
 
 export default ahead;

@@ -1,5 +1,5 @@
 {
-  "name": "kkt-battle",
+  "name": "kkt-tty",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -16,7 +16,8 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/polyfill": "^7.4.4",
-    "gulp": "^4.0.2"
+    "gulp": "^4.0.2",
+    "kkt-battle": "1.0.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.4.4",
