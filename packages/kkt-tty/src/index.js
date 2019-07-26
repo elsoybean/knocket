@@ -66,14 +66,25 @@ process.stdin.on('data', (key: string) => {
   }
 });
 
-events.on('win', (winner: string) => {
+events.on('win', (winner: string, elapsed: number) => {
   // eslint-disable-next-line no-console
-  console.log(winner, 'has won!');
+  console.log(winner, 'has won! It took', elapsed);
 });
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 (async () => {
   try {
-    await battle(render, events);
+    await battle(
+      render,
+      events,
+      async (keepRunning: boolean): Promise<void> => {
+        if (keepRunning) {
+          await sleep(100);
+        }
+      },
+    );
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);

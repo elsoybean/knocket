@@ -1,7 +1,7 @@
 //@flow
 
 import EventEmitter from 'events';
-import { sleep, areEqual } from './util';
+import { areEqual } from './util';
 import { initializeField } from './field';
 import { initializeBot } from './bot';
 import * as moves from './moves';
@@ -19,6 +19,7 @@ const botConfigs: Array<BotConfig> = [
 const battle = async (
   render: (GameState) => Promise<void>,
   events: EventEmitter,
+  postRoundHook: (boolean) => Promise<void>,
 ): Promise<void> => {
   const field = initializeField(FIELD_SIZE);
   const bots = botConfigs.map((config) => initializeBot(field, config, events));
@@ -48,6 +49,7 @@ const battle = async (
     }
   });
 
+  let totalElapsed = 0;
   while (keepRunning) {
     await render(state);
 
@@ -55,11 +57,12 @@ const battle = async (
     const aliveBots = bots.filter((bot) => bot.health > 0);
     if (aliveBots.length == 1) {
       const { color: winner } = aliveBots[0];
-      events.emit('win', winner);
+      events.emit('win', winner, totalElapsed);
       keepRunning = false;
     } else {
       const activeBot = bots.sort((a, b) => a.cooldown - b.cooldown)[0];
       const { cooldown: elapsed } = activeBot;
+      totalElapsed += elapsed;
       bots.forEach((bot) => {
         bot.cooldown -= elapsed;
       });
@@ -68,10 +71,7 @@ const battle = async (
       await applyMove(activeBot, move, state);
     }
 
-    // TODO: Move to presentation callback
-    if (keepRunning) {
-      await sleep(100);
-    }
+    await postRoundHook(keepRunning);
   }
 };
 
