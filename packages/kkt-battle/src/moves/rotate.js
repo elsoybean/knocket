@@ -10,7 +10,7 @@ const rotate = async (
 ): Promise<number> => {
   const { clockwise = true } = options || {};
   bot.heading = (bot.heading + (clockwise ? 1 : 5)) % 6;
-  return Math.random();
+  return 0.5 + Math.random();
 };
 
 export default rotate;

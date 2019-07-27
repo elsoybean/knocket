@@ -11,7 +11,7 @@ const botConfigs: Array<BotConfig> = [
 ];
 
 const options = {
-  gameConfig: { fieldSize: 4, botConfigs },
+  gameConfig: { fieldSize: 5, botConfigs },
   frontend,
 };
 

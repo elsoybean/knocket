@@ -39,10 +39,8 @@ const battle = async ({
 
     let keepRunning = true;
 
-    events.on('input', (command: string) => {
-      if (command === 'quit') {
-        keepRunning = false;
-      }
+    events.on('quit', () => {
+      keepRunning = false;
     });
 
     events.emit('init');
@@ -58,10 +56,10 @@ const battle = async ({
         events.emit('win', winner, state);
         keepRunning = false;
       } else {
-        const activeBot = bots.sort((a, b) => a.cooldown - b.cooldown)[0];
+        const activeBot = aliveBots.sort((a, b) => a.cooldown - b.cooldown)[0];
         const { cooldown: elapsed } = activeBot;
         state.elapsed += elapsed;
-        bots.forEach((bot) => {
+        aliveBots.forEach((bot) => {
           bot.cooldown -= elapsed;
         });
         const { strategy } = activeBot;

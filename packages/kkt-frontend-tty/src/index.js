@@ -25,7 +25,9 @@ const displayPoint = (p: Point, state: GameState): string => {
     const { position, heading, color } = bot;
     if (_.isEqual(p, position)) {
       const c = HEADING_ARROWS[heading];
-      return COLORS[color] + c + '\x1b[0m';
+      return (
+        (bot.health <= 0 ? '\u001b[47m' : '') + COLORS[color] + c + '\x1b[0m'
+      );
     } else {
       return current;
     }
@@ -34,6 +36,8 @@ const displayPoint = (p: Point, state: GameState): string => {
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+let quitting = false;
 
 const render = async (state: GameState): Promise<void> => {
   process.stdout.write('\u001b[2J\u001b[0;0H');
@@ -48,7 +52,9 @@ const render = async (state: GameState): Promise<void> => {
         '\n',
     );
   }
-  await sleep(100);
+  if (!quitting) {
+    await sleep(50);
+  }
 };
 
 const events = new EventEmitter();
@@ -60,6 +66,7 @@ events.on('init', () => {
   process.stdin.setEncoding('utf8');
   process.stdin.on('data', (key: string) => {
     if (key == 'q' || key === '\u0003') {
+      events.emit('quit');
       events.emit('input', 'quit');
     } else if (key === '\u001b[A') {
       events.emit('input', 'ahead');
@@ -80,6 +87,10 @@ events.on('win', (winner: string, state: GameState) => {
 });
 
 events.on('done', process.exit);
+
+events.on('quit', () => {
+  quitting = true;
+});
 
 events.on('error', (err) => {
   // eslint-disable-next-line no-console
