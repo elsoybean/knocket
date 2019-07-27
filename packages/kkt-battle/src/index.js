@@ -22,6 +22,7 @@ const battle = async ({
       elapsed: 0,
       field,
       bots,
+      history: [],
     };
 
     const applyMove = async (
@@ -34,7 +35,9 @@ const battle = async ({
         type && Object.keys(moves).includes(type) ? type : 'wait';
       const moveFunction = moves[moveType];
       // $FlowFixMe - The options will be the right type, but flow can't tell that
-      bot.cooldown = await moveFunction(bot, state, options);
+      const historyItem = await moveFunction(bot, state, options);
+      bot.cooldown = historyItem.elapsed;
+      state.history.unshift(historyItem);
     };
 
     let keepRunning = true;

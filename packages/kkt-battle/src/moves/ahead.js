@@ -3,24 +3,27 @@
 import _ from 'lodash';
 import { HEADINGS } from '../constants';
 
-import type { Bot, GameState } from '../../types/GameState.types';
+import type { Bot, GameState, HistoryItem } from '../../types/GameState.types';
 import type { AheadOptions } from '../../types/Move.types';
 
 const ahead = async (
   bot: Bot,
   state: GameState,
   _options_?: AheadOptions,
-): Promise<number> => {
+): Promise<HistoryItem> => {
   const { position, heading } = bot;
   const { field, bots } = state;
   const newPosition = _.mergeWith({}, position, HEADINGS[heading], _.add);
+  let type = 'wait';
   if (
     field.find((p) => _.isEqual(p, newPosition)) &&
     !bots.find((otherBot) => _.isEqual(otherBot.position, newPosition))
   ) {
     bot.position = newPosition;
+    type = 'action';
   }
-  return 4 + 2 * Math.random();
+  const elapsed = 4 + 2 * Math.random();
+  return { botId: bot.id, elapsed, type };
 };
 
 export default ahead;

@@ -1,5 +1,6 @@
 //@flow
 
+import { v4 as uuid } from 'uuid';
 import * as strategies from '../strategies';
 
 import type EventEmitter from 'events';
@@ -24,8 +25,10 @@ const initializeBot = (
   const strategy = strategies[strategyType](allOptions);
   const cooldown = Math.random() * 3;
   const health = 99;
+  const id = uuid();
 
   return {
+    id,
     color,
     strategy,
     heading,

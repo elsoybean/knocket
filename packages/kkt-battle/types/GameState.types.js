@@ -12,9 +12,10 @@ export type Point = {
 export type Heading = Point;
 
 export type Bot = {
+  id: string,
   position: Point,
   heading: number,
-  strategy: () => Promise<?Move>,
+  strategy: (sensorData: SensorData) => Promise<?HistoryItem>,
   color: string,
   cooldown: number,
   health: number,
@@ -35,7 +36,18 @@ export type GameState = {
   elapsed: number,
   bots: Array<Bot>,
   field: Field,
+  history: Array<HistoryItem>,
 };
+
+export type HistoryItem = {
+  botId: string,
+  elapsed: number,
+} & (
+  | { type: 'wait' }
+  | { type: 'ahead' }
+  | { type: 'rotate', clockwise: boolean }
+  | { type: 'attack', target?: string, damage: number }
+);
 
 export type GameConfig = {
     fieldSize: number,
@@ -69,4 +81,6 @@ export type SensorReading = {
   heading: Heading,
 };
 
-export type SensorData = SensorReading & { history: Array<SensorReading> };
+export type DamageRecord = { attacker: string, target: string, type: 'attack' };
+
+export type SensorData = SensorReading & { previousReadings: Array<SensorReading>, damages: Array<DamageRecord> };

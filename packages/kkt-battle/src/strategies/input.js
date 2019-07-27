@@ -4,15 +4,18 @@
 import EventEmitter, { once } from 'events';
 
 import type { Move } from '../../types/Move.types';
+import type { SensorData } from '../../types/GameState.types';
 
 const input = ({
   inputEventEmitter,
 }: {
   inputEventEmitter?: EventEmitter,
-}) => async (): Promise<?Move> => {
+}) => async (sensorData: SensorData): Promise<?Move> => {
   if (!inputEventEmitter) {
     return;
   }
+
+  console.log(JSON.stringify(sensorData));
 
   const [command, ...options] = await once(inputEventEmitter, 'input');
 

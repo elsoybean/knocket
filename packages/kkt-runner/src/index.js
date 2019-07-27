@@ -7,7 +7,7 @@ import type { BotConfig } from '../../kkt-battle/types/GameState.types';
 
 const botConfigs: Array<BotConfig> = [
   { color: 'red', strategy: { type: 'random' } },
-  { color: 'blue', strategy: { type: 'basic' } },
+  { color: 'blue', strategy: { type: 'input' } },
 ];
 
 const options = {

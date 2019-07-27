@@ -25,7 +25,7 @@ const estimateDamage = (bot: Bot): DamageEstimate => {
 };
 
 const readSensors = (bot: Bot, state: GameState): SensorData => {
-  const { field, bots, elapsed } = state;
+  const { field, bots, elapsed, history } = state;
   const heading = HEADINGS[bot.heading];
 
   const visible = [heading];
@@ -44,10 +44,21 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
   const damage = estimateDamage(bot);
 
   const reading = { elapsed, proximity, damage, heading };
-  const history = [...bot.sensorMemory];
-  bot.sensorMemory = [reading, ...history].slice(0, 3);
+  const previousReadings = [...bot.sensorMemory];
+  bot.sensorMemory = [reading, ...previousReadings].slice(0, 3);
 
-  return { ...reading, history };
+  const lastMove = _.findIndex(history, (h) => h.botId == bot.id);
+  const damages = _(history)
+    .filter(
+      (h, i) =>
+        h.damage > 0 &&
+        (h.botId == bot.id || h.target == bot.id) &&
+        i <= lastMove,
+    )
+    .map((h) => ({ attacker: h.botId, target: h.target, type: h.type }))
+    .value();
+
+  return { ...reading, previousReadings, damages };
 };
 
 export default readSensors;
