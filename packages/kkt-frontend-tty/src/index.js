@@ -1,12 +1,13 @@
 //@flow
 
 import EventEmitter from 'events';
-import battle, { areEqual } from 'kkt-battle';
+import _ from 'lodash';
 
 import type {
   Point,
   GameState,
   Bot,
+  Frontend,
 } from '../../kkt-battle/types/GameState.types';
 
 const HEADING_ARROWS: Array<string> = ['↖', '↗', '→', '↘', '↙', '←'];
@@ -22,7 +23,7 @@ const displayPoint = (p: Point, state: GameState): string => {
   const { bots = [] } = state;
   return bots.reduce((current, bot: Bot) => {
     const { position, heading, color } = bot;
-    if (areEqual(p, position)) {
+    if (_.isEqual(p, position)) {
       const c = HEADING_ARROWS[heading];
       return COLORS[color] + c + '\x1b[0m';
     } else {
@@ -31,7 +32,10 @@ const displayPoint = (p: Point, state: GameState): string => {
   }, '_');
 };
 
-const render = (state: GameState) => {
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const render = async (state: GameState): Promise<void> => {
   process.stdout.write('\u001b[2J\u001b[0;0H');
   const { field } = state;
   const fieldSize = (3 + Math.sqrt(9 + 12 * (field.length - 1))) / 6;
@@ -44,51 +48,45 @@ const render = (state: GameState) => {
         '\n',
     );
   }
+  await sleep(100);
 };
 
 const events = new EventEmitter();
 
-process.stdin.resume();
-// $FlowFixMe - this works
-process.stdin.setRawMode(true);
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (key: string) => {
-  if (key == 'q' || key === '\u0003') {
-    events.emit('input', 'quit');
-  } else if (key === '\u001b[A') {
-    events.emit('input', 'ahead');
-  } else if (key === ' ') {
-    events.emit('input', 'attack');
-  } else if (key === '\u001b[C') {
-    events.emit('input', 'rotate', true);
-  } else if (key === '\u001b[D') {
-    events.emit('input', 'rotate', false);
-  }
+events.on('init', () => {
+  process.stdin.resume();
+  // $FlowFixMe - this works
+  process.stdin.setRawMode(true);
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', (key: string) => {
+    if (key == 'q' || key === '\u0003') {
+      events.emit('input', 'quit');
+    } else if (key === '\u001b[A') {
+      events.emit('input', 'ahead');
+    } else if (key === ' ') {
+      events.emit('input', 'attack');
+    } else if (key === '\u001b[C') {
+      events.emit('input', 'rotate', true);
+    } else if (key === '\u001b[D') {
+      events.emit('input', 'rotate', false);
+    }
+  });
 });
 
-events.on('win', (winner: string, elapsed: number) => {
+events.on('win', (winner: string, state: GameState) => {
+  const { elapsed } = state;
   // eslint-disable-next-line no-console
   console.log(winner, 'has won! It took', elapsed);
 });
 
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+events.on('done', process.exit);
 
-(async () => {
-  try {
-    await battle(
-      render,
-      events,
-      async (keepRunning: boolean): Promise<void> => {
-        if (keepRunning) {
-          await sleep(100);
-        }
-      },
-    );
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err);
-  } finally {
-    process.exit();
-  }
-})();
+events.on('error', (err) => {
+  // eslint-disable-next-line no-console
+  console.error(err);
+  process.exit();
+});
+
+const tty: Frontend = { events, render };
+
+export default tty;

@@ -1,5 +1,5 @@
 {
-  "name": "kkt-tty",
+  "name": "kkt-frontend-tty",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -9,15 +9,15 @@
     "bundle": "rollup --config",
     "bundlewatch": "rollup --config -w",
     "dev": "npm run build:watch",
-    "prepublish": "npm run build",
-    "battle": "node lib/index.js"
+    "generateFlowTypes": "flow-typed install",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/polyfill": "^7.4.4",
     "gulp": "^4.0.2",
-    "kkt-battle": "1.0.0"
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.4.4",

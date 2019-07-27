@@ -1,6 +1,6 @@
 //@flow
 
-import { areEqual, addPoints } from '../util';
+import _ from 'lodash';
 import { HEADINGS } from '../constants';
 
 import type { Bot, GameState } from '../../types/GameState.types';
@@ -13,10 +13,10 @@ const ahead = async (
 ): Promise<number> => {
   const { position, heading } = bot;
   const { field, bots } = state;
-  const newPosition = addPoints(position, HEADINGS[heading]);
+  const newPosition = _.mergeWith({}, position, HEADINGS[heading], _.add);
   if (
-    field.find((p) => areEqual(p, newPosition)) &&
-    !bots.find((otherBot) => areEqual(otherBot.position, newPosition))
+    field.find((p) => _.isEqual(p, newPosition)) &&
+    !bots.find((otherBot) => _.isEqual(otherBot.position, newPosition))
   ) {
     bot.position = newPosition;
   }

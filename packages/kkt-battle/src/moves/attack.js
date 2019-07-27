@@ -1,6 +1,6 @@
 //@flow
 
-import { areEqual, addPoints } from '../util';
+import _ from 'lodash';
 import { HEADINGS } from '../constants';
 
 import type { Bot, GameState } from '../../types/GameState.types';
@@ -13,8 +13,8 @@ const attack = async (
 ): Promise<number> => {
   const { position, heading } = bot;
   const { bots } = state;
-  const target = addPoints(position, HEADINGS[heading]);
-  const hitBot = bots.find((otherBot) => areEqual(otherBot.position, target));
+  const target = _.mergeWith({}, position, HEADINGS[heading], _.add);
+  const hitBot = bots.find((otherBot) => _.isEqual(otherBot.position, target));
   if (hitBot) {
     const damage = Math.floor(20 + 20 * Math.random());
     hitBot.health = Math.max(0, hitBot.health - damage);

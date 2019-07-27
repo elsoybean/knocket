@@ -15,8 +15,8 @@
         },
         {
             "type": "npm",
-            "script": "battle",
-            "path": "packages/kkt-tty/",
+            "script": "battle:single",
+            "path": "packages/kkt-runner/",
             "problemMatcher": [],
             "group": {
                 "kind": "test",
