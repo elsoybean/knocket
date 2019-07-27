@@ -18,6 +18,7 @@ export type Bot = {
   color: string,
   cooldown: number,
   health: number,
+  sensorMemory: Array<SensorReading>,
 };
 
 export type BotConfig = {
@@ -50,3 +51,22 @@ export type BattleOptions = {
     gameConfig: GameConfig,
     frontend: Frontend,
 };
+
+export type ProximityReadingType = 'bot' | 'wall' | 'nothing';
+
+export type ProximityReading = {
+  location: Point,
+  type: ProximityReadingType,
+  damage?: DamageEstimate,
+};
+
+export type DamageEstimate = 'none' | 'minor' | 'major' | 'total';
+
+export type SensorReading = {
+  elapsed: number,
+  proximity: Array<ProximityReading>,
+  damage: DamageEstimate,
+  heading: Heading,
+};
+
+export type SensorData = SensorReading & { history: Array<SensorReading> };

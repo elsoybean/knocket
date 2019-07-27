@@ -32,6 +32,7 @@ const initializeBot = (
     position,
     cooldown,
     health,
+    sensorMemory: [],
   };
 };
 

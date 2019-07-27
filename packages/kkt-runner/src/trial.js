@@ -14,7 +14,7 @@ const results = [];
 const fieldSize = 5;
 const botConfigs: Array<BotConfig> = [
   { color: 'red', strategy: { type: 'random' } },
-  { color: 'blue', strategy: { type: 'random' } },
+  { color: 'blue', strategy: { type: 'basic' } },
 ];
 
 (async () => {
