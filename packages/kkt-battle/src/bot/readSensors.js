@@ -55,7 +55,7 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
         (h.botId == bot.id || h.target == bot.id) &&
         i <= lastMove,
     )
-    .map((h) => ({ attacker: h.botId, target: h.target, type: h.type }))
+    .map((h) => ({ type: h.type, dealt: h.botId == bot.id }))
     .value();
 
   return { ...reading, previousReadings, damages };

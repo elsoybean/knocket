@@ -6,15 +6,15 @@ import EventEmitter, { once } from 'events';
 import type { Move } from '../../types/Move.types';
 
 const input = ({
-  inputEventEmitter,
+  events,
 }: {
-  inputEventEmitter?: EventEmitter,
+  events?: EventEmitter,
 }) => async (): Promise<?Move> => {
-  if (!inputEventEmitter) {
+  if (!events) {
     return;
   }
 
-  const [command, ...options] = await once(inputEventEmitter, 'input');
+  const [command, ...options] = await once(events, 'input');
 
   if (command === 'ahead') {
     return { type: 'ahead' };

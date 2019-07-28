@@ -9,7 +9,7 @@ import type { Bot, BotConfig, Field } from '../../types/GameState.types';
 const initializeBot = (
   field: Field,
   config: BotConfig,
-  inputEventEmitter: EventEmitter,
+  events: EventEmitter,
 ): Bot => {
   const {
     color,
@@ -20,7 +20,7 @@ const initializeBot = (
   const position = field[Math.floor(Math.random() * field.length)];
   const allOptions: Object = {
     ...strategyOptions,
-    inputEventEmitter,
+    events,
   };
   const strategy = strategies[strategyType](allOptions);
   const cooldown = Math.random() * 3;

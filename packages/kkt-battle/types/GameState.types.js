@@ -81,6 +81,6 @@ export type SensorReading = {
   heading: Heading,
 };
 
-export type DamageRecord = { attacker: string, target: string, type: 'attack' };
+export type DamageRecord = { type: 'attack', dealt: boolean };
 
 export type SensorData = SensorReading & { previousReadings: Array<SensorReading>, damages: Array<DamageRecord> };

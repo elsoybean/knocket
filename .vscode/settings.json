@@ -7,5 +7,6 @@
   "flow.showUncovered": true,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "python.pythonPath": "C:\\Python37\\python.exe"
 }
