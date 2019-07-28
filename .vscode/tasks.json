@@ -1,34 +1,48 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558 
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "type": "npm",
-            "script": "dev",
-            "isBackground": true,
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "npm",
-            "script": "battle:single",
-            "path": "packages/kkt-runner/",
-            "problemMatcher": [],
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "npm",
-            "script": "battle:trial",
-            "path": "packages/kkt-runner/",
-            "problemMatcher": [],
-            "group": "test",
-        }
-    ]
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "battle:single",
+      "path": "packages/kkt-runner/",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "battle:trial",
+      "path": "packages/kkt-runner/",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "type": "npm",
+      "script": "battle:train",
+      "path": "packages/kkt-runner/",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "Train",
+      "type": "process",
+      "command": "${config:python.pythonPath}",
+      "args": ["${workspaceRoot}/packages/train/train.py"],
+      "problemMatcher": []
+    }
+  ]
 }

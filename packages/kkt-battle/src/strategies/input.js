@@ -5,12 +5,11 @@ import EventEmitter, { once } from 'events';
 
 import type { Move } from '../../types/Move.types';
 
-const input = ({
-  events,
-}: {
-  events?: EventEmitter,
-}) => async (): Promise<?Move> => {
-  if (!events) {
+const input = ({ events }: { events?: EventEmitter }) => async (
+  sensorData: SensorData,
+  final: boolean,
+): Promise<?Move> => {
+  if (!events || final) {
     return;
   }
 

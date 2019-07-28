@@ -10,7 +10,14 @@ const rotate = () => ({
   options: { clockwise: !!(Math.random() < 0.5) },
 });
 
-const random = () => async (sensorData: SensorData): Promise<?Move> => {
+const random = () => async (
+  sensorData: SensorData,
+  final: boolean,
+): Promise<?Move> => {
+  if (final) {
+    return;
+  }
+
   const { proximity = [], heading } = sensorData;
   const facing = proximity.find((p) => _.isEqual(p.location, heading));
 

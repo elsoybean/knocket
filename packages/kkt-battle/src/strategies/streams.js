@@ -25,17 +25,31 @@ const streams = ({
 }) => {
   const rl = readline.createInterface({ input, output });
 
-  events.on('done', rl.close);
-  events.on('error', rl.close);
+  //events.on('done', rl.close);
+  //events.on('error', rl.close);
 
   const getCommand = (sensorData: SensorData): Promise<string> =>
     new Promise((resolve) => {
       rl.question(JSON.stringify(sensorData) + '\n', resolve);
     });
 
-  return async (sensorData: SensorData): Promise<?Move> => {
-    const command = await getCommand(sensorData);
-    return COMMAND_MAP[command] || COMMAND_MAP['wait'];
+  return async (
+    sensorData: SensorData,
+    final: boolean,
+    winner: boolean,
+  ): Promise<?Move> => {
+    if (final) {
+      output.write(
+        JSON.stringify({
+          ...sensorData,
+          outcome: winner ? 'winner' : 'loser',
+        }) + '\n',
+      );
+      //rl.close();
+    } else {
+      const command = await getCommand(sensorData);
+      return COMMAND_MAP[command] || COMMAND_MAP['wait'];
+    }
   };
 };
 

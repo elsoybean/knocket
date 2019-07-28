@@ -56,6 +56,13 @@ const battle = async ({
       const aliveBots = bots.filter((bot) => bot.health > 0);
       if (aliveBots.length == 1) {
         const { color: winner } = aliveBots[0];
+        await Promise.all(
+          bots.map(async (bot) => {
+            const sensorData = readSensors(bot, state);
+            const { strategy } = bot;
+            await strategy(sensorData, true, bot.health > 0);
+          }),
+        );
         events.emit('win', winner, state);
         keepRunning = false;
       } else {

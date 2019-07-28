@@ -1,5 +1,9 @@
 import sys
 import json
+import os
+import gym
+import gym_knocket
+from random import sample
 
 
 def transform_sensor_data(data):
@@ -15,30 +19,8 @@ def transform_sensor_data(data):
     return output
 
 
-def calculate_score(data):
-    score = 0
-    for dmg in data["damages"]:
-        if dmg["dealt"]:
-            score = score + 2
-        else:
-            score = score - 1
-
-    return score
-
-
-while 1:
-    try:
-        input_string = input()
-
-    except:
-        break
-
-    if not input_string:
-        break
-
-    data = json.loads(input_string)
-    score = calculate_score(data)
-    print("Scored: ", score, file=sys.stderr)
-
-    input_data = transform_sensor_data(data)
-    print("attack")
+env = gym.make('kkt-v1')
+state = env.reset()
+done = False
+while not done:
+    state, reward, done, debug = env.step(sample(env.action_space, 1))

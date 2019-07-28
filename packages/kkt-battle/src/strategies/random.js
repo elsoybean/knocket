@@ -2,7 +2,13 @@
 
 import type { Move } from '../../types/Move.types';
 
-const random = () => async (): Promise<?Move> => {
+const random = () => async (
+  sensorData: SensorData,
+  final: boolean,
+): Promise<?Move> => {
+  if (final) {
+    return;
+  }
   const n = 6 * Math.random();
   if (n < 1) {
     return { type: 'rotate', options: { clockwise: true } };
