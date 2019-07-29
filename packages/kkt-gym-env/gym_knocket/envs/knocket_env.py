@@ -54,6 +54,7 @@ class KnocketEnv(gym.Env):
 
         self.kkt = Popen(['node', './packages/kkt-runner/lib/train.js'],
                          universal_newlines=True, stdout=PIPE, stdin=PIPE)
+        self.done = False
         line = self.kkt.stdout.readline()
         self.state = json.loads(line)
         return self.state

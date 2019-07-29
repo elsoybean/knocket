@@ -9,17 +9,20 @@ const random = () => async (
   if (final) {
     return;
   }
-  const n = 6 * Math.random();
+  const n = 5 * Math.random();
   if (n < 1) {
     return { type: 'rotate', options: { clockwise: true } };
   }
   if (n < 2) {
     return { type: 'rotate', options: { clockwise: false } };
   }
-  if (n < 4) {
+  if (n < 3) {
     return { type: 'attack' };
   }
-  return { type: 'ahead' };
+  if (n < 4) {
+    return { type: 'ahead' };
+  }
+  return { type: 'wait' };
 };
 
 export default random;
