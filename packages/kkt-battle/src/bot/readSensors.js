@@ -27,8 +27,11 @@ const estimateDamage = (bot: Bot): DamageEstimate => {
 const readSensors = (bot: Bot, state: GameState): SensorData => {
   const { field, bots, elapsed, history } = state;
   const heading = HEADINGS[bot.heading];
+  const left = HEADINGS[(bot.heading + 5) % 6];
+  const right = HEADINGS[(bot.heading + 1) % 6];
+  const twoforward = _.mergeWith({}, heading, heading, _.add);
 
-  const visible = [heading];
+  const visible = [heading, left, right, twoforward];
   const proximity = visible.map((h) => {
     const newPosition = _.mergeWith({}, bot.position, h, _.add);
     if (!field.find((p) => _.isEqual(p, newPosition))) {
@@ -36,7 +39,12 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
     }
     const otherBot = bots.find((b) => _.isEqual(b.position, newPosition));
     if (otherBot) {
-      return { location: h, type: 'bot', damage: estimateDamage(otherBot) };
+      return {
+        location: h,
+        type: 'bot',
+        damage: estimateDamage(otherBot),
+        heading: otherBot.heading,
+      };
     }
     return { location: h, type: 'none' };
   });

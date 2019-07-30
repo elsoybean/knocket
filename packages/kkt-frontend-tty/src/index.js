@@ -70,12 +70,16 @@ events.on('init', () => {
       events.emit('input', 'quit');
     } else if (key === '\u001b[A') {
       events.emit('input', 'ahead');
+    } else if (key === '\u001b[B') {
+      events.emit('input', 'reverse');
     } else if (key === ' ') {
       events.emit('input', 'attack');
     } else if (key === '\u001b[C') {
       events.emit('input', 'rotate', true);
     } else if (key === '\u001b[D') {
       events.emit('input', 'rotate', false);
+    } else if (key === 'x') {
+      events.emit('input', 'defend');
     }
   });
 });

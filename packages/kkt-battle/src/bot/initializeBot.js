@@ -24,12 +24,14 @@ const initializeBot = (
   };
   const strategy = strategies[strategyType](allOptions);
   const cooldown = Math.random() * 3;
+  const defending = false;
   const health = 99;
   const id = uuid();
 
   return {
     id,
     color,
+    defending,
     strategy,
     heading,
     position,

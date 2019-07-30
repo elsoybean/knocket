@@ -6,29 +6,29 @@ import { spawn } from 'child_process';
 
 import type { BotConfig } from '../../kkt-battle/types/GameState.types';
 
-const train = spawn('python', ['../train/train.py'], {
+const play = spawn('python', ['../train/play.py'], {
   stdio: 'pipe',
 });
 
-train.stdout.setEncoding('utf8');
-train.stderr.setEncoding('utf8');
+play.stdout.setEncoding('utf8');
+play.stderr.setEncoding('utf8');
 
-train.stderr.on('data', (message) => {
-  console.error('trainer err: ', message);
+play.stderr.on('data', (message) => {
+  console.error('model err: ', message);
 });
 
-train.on('close', (code) => {
-  console.error('trainer exited with', code);
+play.on('close', (code) => {
+  console.error('model exited with', code);
   process.exit();
 });
 
 const botConfigs: Array<BotConfig> = [
-  { color: 'blue', strategy: { type: 'input' } },
+  { color: 'blue', strategy: { type: 'basic' } },
   {
     color: 'yellow',
     strategy: {
-      type: 'streams',
-      options: { input: train.stdout, output: train.stdin },
+      type: 'input',
+      //options: { input: play.stdout, output: play.stdin },
     },
   },
 ];

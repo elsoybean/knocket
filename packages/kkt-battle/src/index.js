@@ -2,7 +2,7 @@
 
 import EventEmitter from 'events';
 import { initializeField } from './field';
-import { initializeBot, readSensors } from './bot';
+import { initializeBot, readSensors, reset } from './bot';
 import * as moves from './moves';
 
 import type { Bot, GameState, BattleOptions } from '../types/GameState.types';
@@ -72,6 +72,7 @@ const battle = async ({
         aliveBots.forEach((bot) => {
           bot.cooldown -= elapsed;
         });
+        reset(activeBot);
 
         const sensorData = readSensors(activeBot, state);
         events.emit('sensor', sensorData);

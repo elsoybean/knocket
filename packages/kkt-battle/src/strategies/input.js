@@ -21,6 +21,12 @@ const input = ({ events }: { events?: EventEmitter }) => async (
   if (command === 'attack') {
     return { type: 'attack' };
   }
+  if (command === 'reverse') {
+    return { type: 'reverse' };
+  }
+  if (command === 'defend') {
+    return { type: 'defend' };
+  }
   if (command === 'rotate') {
     const [clockwise]: [boolean] = options;
     return { type: 'rotate', options: { clockwise } };

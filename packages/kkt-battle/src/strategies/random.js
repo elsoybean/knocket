@@ -9,7 +9,7 @@ const random = () => async (
   if (final) {
     return;
   }
-  const n = 5 * Math.random();
+  const n = 7 * Math.random();
   if (n < 1) {
     return { type: 'rotate', options: { clockwise: true } };
   }
@@ -21,6 +21,12 @@ const random = () => async (
   }
   if (n < 4) {
     return { type: 'ahead' };
+  }
+  if (n < 5) {
+    return { type: 'defend' };
+  }
+  if (n < 6) {
+    return { type: 'reverse' };
   }
   return { type: 'wait' };
 };

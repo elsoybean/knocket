@@ -20,6 +20,7 @@ export type Bot = {
   cooldown: number,
   health: number,
   sensorMemory: Array<SensorReading>,
+  defending: boolean,
 };
 
 export type BotConfig = {

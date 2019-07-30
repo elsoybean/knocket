@@ -9,6 +9,8 @@ import type { Move } from '../../types/Move.types';
 const COMMAND_MAP: { [string]: Move } = {
   ahead: { type: 'ahead' },
   attack: { type: 'attack' },
+  reverse: { type: 'reverse' },
+  defend: { type: 'defend' },
   wait: { type: 'wait' },
   rotatecw: { type: 'rotate', options: { clockwise: true } },
   rotateccw: { type: 'rotate', options: { clockwise: false } },

@@ -18,9 +18,15 @@ const attack = async (
 
   let damage = 0;
   if (hitBot) {
-    damage = Math.floor(20 + 20 * Math.random());
+    damage = Math.floor(
+      20 +
+        20 *
+          Math.random() *
+          (hitBot.defending ? 0.2 : hitBot.attacking ? 1.5 : 1.0),
+    );
     hitBot.health = Math.max(0, hitBot.health - damage);
   }
+  bot.attacking = true;
 
   const elapsed = 1.5 + Math.random();
   return {
