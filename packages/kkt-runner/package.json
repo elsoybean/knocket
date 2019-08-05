@@ -12,7 +12,6 @@
     "generateFlowTypes": "flow-typed install",
     "prepublish": "npm run build",
     "battle:single": "node lib/index.js",
-    "battle:train": "node lib/train.js",
     "battle:trial": "node lib/trial.js"
   },
   "dependencies": {

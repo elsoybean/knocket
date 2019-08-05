@@ -39,7 +39,7 @@ class DQN:
         self.gamma = 0.999
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9999
+        self.epsilon_decay = 0.9997697
         self.learning_rate = 0.01
         self.tau = .125
 
@@ -134,7 +134,7 @@ class DQN:
 
 def main():
     model_name = sys.argv[1] if len(sys.argv) > 1 else "DQN"
-    trials = 1000
+    trials = 10000
     dqn_agent = DQN(model_name)
     strategy_list = [
         Random(),
@@ -156,7 +156,7 @@ def main():
         print("\n\nTrial {}, Strategy: {}".format(trial, strat.name()))
 
         while not done:
-            if cur_state['elapsed'] > (pct + 1) / 10:
+            if (cur_state['elapsed'] / 2000) > (pct + 1) / 100:
                 pct += 1
                 sys.stdout.write('.')
                 sys.stdout.flush()
@@ -177,7 +177,7 @@ def main():
 
         print("\nScore: {}, Steps: {}".format(reward, steps))
 
-        if trial % 10 == 0 or reward > 0:
+        if trial % 100 == 0 or reward > 0:
             dqn_agent.save_model("trial-{}.model".format(trial))
 
 

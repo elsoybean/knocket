@@ -1,6 +1,15 @@
+import os  # NOQA: E402
+
+import warnings  # NOQA: E402
+warnings.filterwarnings('ignore')  # NOQA: E402
+
+import tensorflow as tf  # NOQA: E402
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # NOQA: E402
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)  # NOQA: E402
+
 import sys
 import json
-import os
 import numpy as np
 from keras.models import load_model
 from os import path

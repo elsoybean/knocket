@@ -6,6 +6,7 @@
     {
       "type": "npm",
       "script": "dev",
+      "label": "Background Build Watcher",
       "isBackground": true,
       "problemMatcher": [],
       "group": {
@@ -33,29 +34,13 @@
     {
       "type": "npm",
       "script": "battle:trial",
+      "label": "Set of Battles",
       "path": "packages/kkt-runner/",
       "problemMatcher": [],
       "group": "test"
     },
     {
-      "type": "npm",
-      "script": "battle:train",
-      "path": "packages/kkt-runner/",
-      "problemMatcher": [],
-      "group": "test"
-    },
-    {
-      "label": "Train",
-      "type": "process",
-      "command": "${config:python.pythonPath}",
-      "args": ["${workspaceRoot}/packages/train/train.py", "${input:modelname}"],
-      "options": {
-        "cwd": "${workspaceRoot}/packages/train"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "DQN",
+      "label": "Train DQN",
       "type": "process",
       "command": "${config:python.pythonPath}",
       "args": ["-m", "kkt_training.DQN", "${input:modelname}"],

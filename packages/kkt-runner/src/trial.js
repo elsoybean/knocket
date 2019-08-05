@@ -22,6 +22,7 @@ const botConfigs: Array<BotConfig> = [
     const events = new EventEmitter();
 
     events.on('error', (err) => {
+      // eslint-disable-next-line no-console
       console.error(err);
       process.exit();
     });
@@ -47,8 +48,10 @@ const botConfigs: Array<BotConfig> = [
   _(results)
     .groupBy('winner')
     .each((wins, bot) => {
+      // eslint-disable-next-line no-console
       console.log(bot, ((100 * wins.length) / results.length).toFixed(2));
     });
+  // eslint-disable-next-line no-console
   console.log(
     'Min:',
     _.minBy(results, 'elapsed').elapsed,

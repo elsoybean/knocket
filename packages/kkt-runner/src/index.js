@@ -37,7 +37,7 @@ play.on('close', (code) => {
 });
 
 const botConfigs: Array<BotConfig> = [
-  { color: 'blue', strategy: { type: 'input' } },
+  { color: 'blue', strategy: { type: 'basic' } },
   {
     color: 'yellow',
     strategy: {
