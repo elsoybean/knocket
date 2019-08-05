@@ -26,10 +26,12 @@ play.stdout.setEncoding('utf8');
 play.stderr.setEncoding('utf8');
 
 play.stderr.on('data', (message) => {
+  // eslint-disable-next-line no-console
   console.error('model err: ', message);
 });
 
 play.on('close', (code) => {
+  // eslint-disable-next-line no-console
   console.error('model exited with', code);
   process.exit();
 });
