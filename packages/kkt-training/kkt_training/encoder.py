@@ -62,7 +62,17 @@ class Encoder:
         output += Encoder.encode_damage(data.get("damage"))
         output += Encoder.encode_heading(data.get("heading"))
         output += Encoder.encode_range_finder(
-            data.get("rangeFinder", [False]*6))
+            data.get("compass", [False]*6))
+        return output
+
+    @staticmethod
+    def encode_move_history(data):
+        output = []
+        for i in range(len(data)):
+            output += [data[i].get("elapsed", 0) / 10] + \
+                Encoder.encode_move(data[i])
+        for i in range(len(data), 5):
+            output += [0] + Encoder.encode_move({})
         return output
 
     @staticmethod
@@ -79,6 +89,9 @@ class Encoder:
         damages = raw_state.get("damages", [])
         output.append(1 if any(dmg["dealt"] for dmg in damages) else 0)
         output.append(1 if any(not dmg["dealt"] for dmg in damages) else 0)
+
+        output += Encoder.encode_move_history(raw_state.get('moveHistory', []))
+
         return np.array(output)
 
     @staticmethod

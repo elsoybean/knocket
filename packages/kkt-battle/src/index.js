@@ -37,7 +37,7 @@ const battle = async ({
       // $FlowFixMe - The options will be the right type, but flow can't tell that
       const historyItem = await moveFunction(bot, state, options);
       bot.cooldown = historyItem.elapsed;
-      bot.lastMove = historyItem;
+      bot.moveHistory.unshift(historyItem);
       state.history.unshift(historyItem);
     };
 

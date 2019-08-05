@@ -39,32 +39,34 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
     }
     const otherBot = bots.find((b) => _.isEqual(b.position, newPosition));
     if (otherBot) {
+      const { moveHistory: [lastMove] = [] } = otherBot;
       return {
         location: h,
         type: 'bot',
         damage: estimateDamage(otherBot),
         heading: otherBot.heading,
-        lastMove: otherBot.lastMove,
+        lastMove,
       };
     }
     return { location: h, type: 'none' };
   });
 
-  const rangeFinder = [false, false, false, false, false, false];
+  const compass = [false, false, false, false, false, false];
   bots.forEach((b) => {
     if (!_.isEqual(b.position, bot.position)) {
       const span = _.mergeWith({}, b.position, bot.position, _.subtract);
       const distance = _(span)
         .values()
+        .map((v) => Math.abs(v))
         .max();
-      const heading = _.mapValues(span, (v) => Math.floor(v / distance));
+      const heading = _.mapValues(span, (v) => Math.trunc(v / distance) || 0);
       HEADINGS.forEach((h, idx) => {
         if (
-          (!heading.x || heading.x == span.x) &&
-          (!heading.y || heading.y == span.y) &&
-          (!heading.z || heading.z == span.z)
+          (!heading.x || heading.x == h.x) &&
+          (!heading.y || heading.y == h.y) &&
+          (!heading.z || heading.z == h.z)
         ) {
-          rangeFinder[idx] = true;
+          compass[idx] = true;
         }
       });
     }
@@ -77,23 +79,29 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
     proximity,
     damage,
     heading: bot.heading,
-    rangeFinder,
+    compass,
   };
   const previousReadings = [...bot.sensorMemory];
   bot.sensorMemory = [reading, ...previousReadings].slice(0, 3);
 
-  const lastMove = _.findIndex(history, (h) => h.botId == bot.id);
+  const lastTurn = _.findIndex(history, (h) => h.botId == bot.id);
   const damages = _(history)
     .filter(
       (h, i) =>
         h.damage > 0 &&
         (h.botId == bot.id || h.target == bot.id) &&
-        i <= lastMove,
+        i <= lastTurn,
     )
     .map((h) => ({ type: h.type, dealt: h.botId == bot.id, amount: h.damage }))
     .value();
 
-  return { ...reading, previousReadings, damages };
+  const moveHistory = bot.moveHistory.slice(0, 5).map((h) => {
+    // eslint-disable-next-line no-unused-vars
+    const { botId: _botId_, ...rest } = h;
+    return rest;
+  });
+
+  return { ...reading, previousReadings, damages, moveHistory };
 };
 
 export default readSensors;

@@ -31,7 +31,7 @@ const displayPoint = (p: Point, state: GameState): string => {
     } else {
       return current;
     }
-  }, '_');
+  }, '·');
 };
 
 const sleep = (ms: number) =>

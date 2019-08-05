@@ -14,6 +14,7 @@ import gym_knocket
 import numpy as np
 from numpy.random import choice
 import random
+import json
 from keras.optimizers import Adam
 from keras.layers import Dense
 from keras.models import Sequential
@@ -157,6 +158,10 @@ def main():
                 pct += 1
                 sys.stdout.write('.')
                 sys.stdout.flush()
+
+            if steps == 10:
+                print("\n", json.dumps(cur_state, indent=2))
+                exit(0)
 
             action = dqn_agent.act(cur_state, strat)
             new_state, reward, done, _ = env.step(action)

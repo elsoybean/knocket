@@ -90,7 +90,7 @@ class TestEncoderMethods(unittest.TestCase):
             {"type": "wall"},
             {"type": "none"},
             bot_proximity,
-        ], "damage": "minor", "heading": 6, "rangeFinder": [False, False, False, False, False, True]}
+        ], "damage": "minor", "heading": 6, "compass": [False, False, False, False, False, True]}
         expected = [237 / 2000] + e.encode_proximity({"type": "none"}) + e.encode_proximity({"type": "wall"}) + e.encode_proximity({"type": "none"}) + e.encode_proximity(
             bot_proximity) + e.encode_damage("minor") + e.encode_heading(6) + e.encode_range_finder([False, False, False, False, False, True])
         self.assertEqual(e.encode_reading(d), expected)
@@ -120,7 +120,7 @@ class TestEncoderMethods(unittest.TestCase):
 
     def test_encoded_state_length(self):
         e = Encoder()
-        self.assertEqual(390, e.encoded_state_length)
+        self.assertEqual(430, e.encoded_state_length)
 
 
 if __name__ == '__main__':
