@@ -62,3 +62,6 @@ typings/
 
 lib/
 flow-typed/
+
+__pycache__/
+models/

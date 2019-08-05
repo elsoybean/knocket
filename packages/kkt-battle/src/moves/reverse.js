@@ -22,7 +22,7 @@ const reverse = async (bot: Bot, state: GameState): Promise<HistoryItem> => {
     bot.position = newPosition;
     type = 'reverse';
   }
-  const elapsed = 5 + 2 * Math.random();
+  const elapsed = 1.5 + Math.random();
   return { botId: bot.id, elapsed, type };
 };
 

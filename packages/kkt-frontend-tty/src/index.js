@@ -41,7 +41,7 @@ let quitting = false;
 
 const render = async (state: GameState): Promise<void> => {
   process.stdout.write('\u001b[2J\u001b[0;0H');
-  const { field } = state;
+  const { field, history, bots } = state;
   const fieldSize = (3 + Math.sqrt(9 + 12 * (field.length - 1))) / 6;
   for (let x = -1 * (fieldSize - 1); x < fieldSize; x++) {
     const row = field.filter((p) => p.x === x) || [];
@@ -52,8 +52,15 @@ const render = async (state: GameState): Promise<void> => {
         '\n',
     );
   }
+  const botColors = _.mapValues(_.keyBy(bots, 'id'), 'color');
+  process.stdout.write('\n\n');
+  history.slice(0, 5).forEach((h) => {
+    const { botId, type } = h;
+    process.stdout.write(COLORS[botColors[botId]] + type + '\x1b[0m\n');
+  });
+
   if (!quitting) {
-    await sleep(50);
+    await sleep(150);
   }
 };
 

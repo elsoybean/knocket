@@ -1,29 +1,30 @@
 import json
 import gym
+import numpy as np
 from gym import error, spaces, utils
 from gym.utils import seeding
 from subprocess import Popen, PIPE
 
 
-def calculate_reward(data):
-    reward = 0
-    for dmg in data["damages"]:
-        if dmg["dealt"]:
-            reward += 2
-        else:
-            reward -= 1.5
-
-    return reward
-
-
 class KnocketEnv(gym.Env):
     metadata = {'render.modes': ['human']}
-    action_space = ["ahead", "wait", "attack", "rotatecw", "rotateccw"]
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.versus = kwargs.get('versus', 'basic')
+        self.runner = kwargs.get(
+            'runner', './packages/kkt-runner/lib/train.js')
         self.kkt = False
-        self.state = {}
-        self.done = False
+        self.action_space = spaces.Discrete(7)
+
+    def calculate_reward(self):
+        reward = 0
+        for dmg in self.state["damages"]:
+            if dmg["dealt"]:
+                reward += (dmg['amount'] / 99) * 0.5
+            else:
+                reward -= (dmg['amount'] / 99) * 0.5
+
+        return reward
 
     def step(self, action):
         print(action, file=self.kkt.stdin)
@@ -39,9 +40,10 @@ class KnocketEnv(gym.Env):
 
         if not self.done:
             self.state = json.loads(line)
+            reward = self.calculate_reward()
             if "outcome" in self.state:
                 self.done = True
-            reward = calculate_reward(self.state)
+                reward += 0.50 if self.state["outcome"] == "winner" else -0.50
         else:
             self.state = {}
             reward = 0
@@ -52,7 +54,7 @@ class KnocketEnv(gym.Env):
         if self.kkt:
             self.kkt.kill()
 
-        self.kkt = Popen(['node', './packages/kkt-runner/lib/train.js'],
+        self.kkt = Popen(['node', self.runner, self.versus],
                          universal_newlines=True, stdout=PIPE, stdin=PIPE)
         self.done = False
         line = self.kkt.stdout.readline()

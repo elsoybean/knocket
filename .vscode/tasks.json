@@ -16,8 +16,15 @@
     {
       "type": "npm",
       "script": "battle:single",
+      "label": "Single Battle",
       "path": "packages/kkt-runner/",
       "problemMatcher": [],
+      "options": {
+        "env": {
+          "MODEL_NAME": "${input:modelname}",
+          "MODEL_TRIAL": "${input:modeltrial}"
+        }
+      },
       "group": {
         "kind": "test",
         "isDefault": true
@@ -41,8 +48,38 @@
       "label": "Train",
       "type": "process",
       "command": "${config:python.pythonPath}",
-      "args": ["${workspaceRoot}/packages/train/train.py"],
+      "args": ["${workspaceRoot}/packages/train/train.py", "${input:modelname}"],
+      "options": {
+        "cwd": "${workspaceRoot}/packages/train"
+      },
       "problemMatcher": []
+    },
+    {
+      "label": "DQN",
+      "type": "process",
+      "command": "${config:python.pythonPath}",
+      "args": ["-m", "kkt_training.DQN", "${input:modelname}"],
+      "options": {
+        "cwd": "${workspaceRoot}",
+        "env": {
+          "PYTHONPATH": "${workspaceRoot}/packages/kkt-training"
+        }
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "modelname",
+      "description": "Model Name:",
+      "default": "new_model",
+      "type": "promptString"
+    },
+    {
+      "id": "modeltrial",
+      "description": "Model Trial:",
+      "default": "0",
+      "type": "promptString"
     }
   ]
 }

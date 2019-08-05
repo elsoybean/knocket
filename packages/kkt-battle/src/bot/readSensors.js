@@ -44,14 +44,41 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
         type: 'bot',
         damage: estimateDamage(otherBot),
         heading: otherBot.heading,
+        lastMove: otherBot.lastMove,
       };
     }
     return { location: h, type: 'none' };
   });
 
+  const rangeFinder = [false, false, false, false, false, false];
+  bots.forEach((b) => {
+    if (!_.isEqual(b.position, bot.position)) {
+      const span = _.mergeWith({}, b.position, bot.position, _.subtract);
+      const distance = _(span)
+        .values()
+        .max();
+      const heading = _.mapValues(span, (v) => Math.floor(v / distance));
+      HEADINGS.forEach((h, idx) => {
+        if (
+          (!heading.x || heading.x == span.x) &&
+          (!heading.y || heading.y == span.y) &&
+          (!heading.z || heading.z == span.z)
+        ) {
+          rangeFinder[idx] = true;
+        }
+      });
+    }
+  });
+
   const damage = estimateDamage(bot);
 
-  const reading = { elapsed, proximity, damage, heading };
+  const reading = {
+    elapsed,
+    proximity,
+    damage,
+    heading: bot.heading,
+    rangeFinder,
+  };
   const previousReadings = [...bot.sensorMemory];
   bot.sensorMemory = [reading, ...previousReadings].slice(0, 3);
 
@@ -63,7 +90,7 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
         (h.botId == bot.id || h.target == bot.id) &&
         i <= lastMove,
     )
-    .map((h) => ({ type: h.type, dealt: h.botId == bot.id }))
+    .map((h) => ({ type: h.type, dealt: h.botId == bot.id, amount: h.damage }))
     .value();
 
   return { ...reading, previousReadings, damages };

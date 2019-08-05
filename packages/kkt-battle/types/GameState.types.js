@@ -21,6 +21,7 @@ export type Bot = {
   health: number,
   sensorMemory: Array<SensorReading>,
   defending: boolean,
+  lastMove?: HistoryItem,
 };
 
 export type BotConfig = {
@@ -80,6 +81,7 @@ export type SensorReading = {
   proximity: Array<ProximityReading>,
   damage: DamageEstimate,
   heading: Heading,
+  rangeFinder: Array<boolean>,
 };
 
 export type DamageRecord = { type: 'attack', dealt: boolean };

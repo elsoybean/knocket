@@ -27,7 +27,7 @@ events.on('error', (err) => {
 });
 
 const options = {
-  gameConfig: { fieldSize: 5, botConfigs },
+  gameConfig: { fieldSize: 4, botConfigs },
   frontend: { events, render: undefined },
 };
 

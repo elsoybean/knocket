@@ -28,7 +28,7 @@ const attack = async (
   }
   bot.attacking = true;
 
-  const elapsed = 1.5 + Math.random();
+  const elapsed = 4 + 2 * Math.random();
   return {
     botId: bot.id,
     type: 'attack',

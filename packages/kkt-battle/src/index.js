@@ -37,6 +37,7 @@ const battle = async ({
       // $FlowFixMe - The options will be the right type, but flow can't tell that
       const historyItem = await moveFunction(bot, state, options);
       bot.cooldown = historyItem.elapsed;
+      bot.lastMove = historyItem;
       state.history.unshift(historyItem);
     };
 
@@ -52,9 +53,19 @@ const battle = async ({
     }
 
     while (keepRunning) {
-      const { bots } = state;
+      const { bots, elapsed } = state;
       const aliveBots = bots.filter((bot) => bot.health > 0);
-      if (aliveBots.length == 1) {
+      if (elapsed > 2000) {
+        await Promise.all(
+          bots.map(async (bot) => {
+            const sensorData = readSensors(bot, state);
+            const { strategy } = bot;
+            await strategy(sensorData, true, false);
+          }),
+        );
+        events.emit('win', 'draw', state);
+        keepRunning = false;
+      } else if (aliveBots.length == 1) {
         const { color: winner } = aliveBots[0];
         await Promise.all(
           bots.map(async (bot) => {

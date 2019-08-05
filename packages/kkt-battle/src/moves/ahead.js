@@ -22,7 +22,7 @@ const ahead = async (
     bot.position = newPosition;
     type = 'ahead';
   }
-  const elapsed = 4 + 2 * Math.random();
+  const elapsed = 1.5 + Math.random();
   return { botId: bot.id, elapsed, type };
 };
 

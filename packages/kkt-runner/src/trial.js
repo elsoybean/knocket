@@ -11,7 +11,7 @@ import type {
 
 const results = [];
 
-const fieldSize = 5;
+const fieldSize = 4;
 const botConfigs: Array<BotConfig> = [
   { color: 'red', strategy: { type: 'random' } },
   { color: 'blue', strategy: { type: 'basic' } },
