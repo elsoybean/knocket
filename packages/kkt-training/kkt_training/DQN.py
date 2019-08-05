@@ -25,6 +25,7 @@ from .strategy import Random
 from .strategy import Weighted
 from .strategy import Basic
 from .strategy import Attack
+from .strategy import Erratic
 
 
 class DQN:
@@ -38,8 +39,8 @@ class DQN:
         self.gamma = 0.999
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.99999995
-        self.learning_rate = 0.001
+        self.epsilon_decay = 0.9999
+        self.learning_rate = 0.01
         self.tau = .125
 
         self.model = self.create_model()
@@ -140,6 +141,7 @@ def main():
         Weighted({"attack": 2, "ahead": 3, "wait": 0}),
         Basic(),
         Attack(),
+        Erratic(3),
     ]
 
     env = gym.make("kkt-v1")
@@ -158,10 +160,6 @@ def main():
                 pct += 1
                 sys.stdout.write('.')
                 sys.stdout.flush()
-
-            if steps == 10:
-                print("\n", json.dumps(cur_state, indent=2))
-                exit(0)
 
             action = dqn_agent.act(cur_state, strat)
             new_state, reward, done, _ = env.step(action)

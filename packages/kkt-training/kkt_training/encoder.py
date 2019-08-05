@@ -29,13 +29,18 @@ class Encoder:
         return output
 
     @staticmethod
-    def encode_move(move):  # 7
+    def move_to_action(move):
         move_type = move.get('type', 'n/a')
         if move_type == 'rotate':
             move_type += 'cw' if move.get("clockwise") else 'ccw'
+        return move_type
+
+    @staticmethod
+    def encode_move(move):  # 7
         output = []
+        action = Encoder.move_to_action(move)
         for lbl in Encoder.actions:
-            output.append(1 if lbl == move_type else 0)
+            output.append(1 if lbl == action else 0)
         return output
 
     @staticmethod

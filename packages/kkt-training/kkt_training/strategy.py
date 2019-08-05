@@ -44,3 +44,13 @@ class Basic(Strategy):
         if state["proximity"][0]["type"] == "wall":
             return choice(["rotatecw", "rotateccw"])
         return choice(["rotatecw", "rotateccw", "ahead", "ahead", "ahead", "reverse"])
+
+
+class Erratic(Strategy):
+    def __init__(self, length):
+        self.length = length
+
+    def act(self, state):
+        last_moves = [Encoder.move_to_action(
+            h) for h in state.get("moveHistory", [])[:self.length]]
+        return choice(list(set(actions) - set(last_moves)))
