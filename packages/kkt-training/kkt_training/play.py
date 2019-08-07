@@ -15,7 +15,7 @@ from keras.models import load_model
 from os import path
 from .encoder import Encoder
 
-default_model_filename = "../../models/dqn_models/new_model/trial-0.model"
+default_model_filename = "../../models/dqn_models/new_model/trial_0.model"
 model_filename = sys.argv[1] if len(sys.argv) > 1 else default_model_filename
 trained_model = load_model(model_filename)
 e = Encoder()

@@ -8,12 +8,9 @@ import { spawn } from 'child_process';
 import type { BotConfig } from '../../kkt-battle/types/GameState.types';
 
 const { MODEL_NAME = 'new_model', MODEL_TRIAL = '0' } = process.env;
-
-const model_file = path.join(
-  '../../models/dqn_models',
-  MODEL_NAME,
-  'trial-' + MODEL_TRIAL + '.model',
-);
+const filename =
+  MODEL_TRIAL == 'final' ? 'final.model' : 'trial_' + MODEL_TRIAL + '.model';
+const model_file = path.join('../../models/dqn_models', MODEL_NAME, filename);
 
 const play = spawn('python', ['-m', 'kkt_training.play', model_file], {
   stdio: 'pipe',

@@ -15,11 +15,13 @@ import numpy as np
 from numpy.random import choice
 import random
 import json
+import signal
+from collections import Counter
+from collections import deque
 from keras.optimizers import Adam
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.models import model_from_json
-from collections import deque
 from .encoder import Encoder
 from .strategy import Random
 from .strategy import Weighted
@@ -34,20 +36,31 @@ class DQN:
         self.output_length = len(Encoder.actions)  # 7
         self.encoder = Encoder()
 
-        self.memory = deque(maxlen=10000)
+        self.memory = deque(maxlen=10000000)
 
         self.gamma = 0.999
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        self.epsilon_decay = 0.9997697
-        self.learning_rate = 0.01
+        # reach 0.5 after ~4,000 trials of 80 steps each
+        self.epsilon_decay = 0.9999978339
+        # don't start decreasing epsilon until ~1000 trials of 80 steps have passed
+        self.epsilon_decay_delay = 1000 * 80
+        self.learning_rate = 0.001
+        self.steps = 0
         self.tau = .125
+
+        # Target remembering about 2 zero reward steps for every reward step
+        self.bias_against_zero_reward = 0.91748153
+
+        # warm up for ~100 games of 80 steps before we attempt to train at all
+        self.min_memory_length = 100 * 80
 
         self.model = self.create_model()
         print(self.model.summary())
 
         self.target_model = self.create_model()
         self.model_name = model_name
+        self.model_base_path = './models/dqn_models/'
         self.model_path = None
 
     def create_model(self):
@@ -60,23 +73,26 @@ class DQN:
                       optimizer=Adam(lr=0.001), metrics=['accuracy'])
         return model
 
-    def default_action(self, state):
-        weighted_actions = [6, 1, 1, 2, 2, 0, 0]
-        action_ix = choice(range(self.output_length), p=np.array(
-            weighted_actions) / sum(weighted_actions))
-        return np.eye(self.output_length, dtype=int)[action_ix]
-
     def act(self, state, strat):
-        self.epsilon *= self.epsilon_decay
+        self.steps += 1
+        if self.steps > self.epsilon_decay_delay:
+            self.epsilon *= self.epsilon_decay
         self.epsilon = max(self.epsilon_min, self.epsilon)
         if np.random.random_sample() < self.epsilon:
             return strat.act(state)
+        else:
+            return self.predict(state)
 
+    def predict(self, state):
         encoded_state = self.encoder.encode_state(state).reshape(1, -1)
         prediction = self.model.predict(encoded_state)
         return self.encoder.actions[np.argmax(prediction)]
 
     def remember(self, state, action, reward, new_state, done):
+        # Discard most zero reward steps
+        if reward == 0 and np.random.random_sample() < self.bias_against_zero_reward:
+            return
+
         encoded_state = self.encoder.encode_state(state).reshape(1, -1)
         encoded_new_state = self.encoder.encode_state(new_state).reshape(1, -1)
         encoded_action = self.encoder.encode_action(action)
@@ -84,8 +100,8 @@ class DQN:
             [encoded_state, encoded_action, reward, encoded_new_state, done])
 
     def replay(self):
-        batch_size = 32
-        if len(self.memory) < batch_size:
+        batch_size = 200
+        if len(self.memory) < batch_size or self.steps < self.min_memory_length:
             return
 
         samples = random.sample(self.memory, batch_size)
@@ -94,12 +110,15 @@ class DQN:
             state, action, reward, new_state, done = sample
             target = self.target_model.predict(state)
             if done:
-                target[0][action] = reward
+                expected_reward = reward
             else:
                 Q_future = max(self.target_model.predict(
                     new_state)[0])
-                target[0][action] = reward + Q_future * self.gamma
-            self.model.fit(state, target, epochs=1, verbose=0)
+                expected_reward = reward + Q_future * self.gamma
+
+            target[0][action] = expected_reward
+            self.model.train_on_batch(state, target)
+            return expected_reward
 
     def target_train(self):
         weights = self.model.get_weights()
@@ -110,12 +129,11 @@ class DQN:
         self.target_model.set_weights(target_weights)
 
     def ensure_model_path(self):
-        model_base_path = './models/dqn_models/'
-        model_path = os.path.join(model_base_path, self.model_name)
+        model_path = os.path.join(self.model_base_path, self.model_name)
         model_inc = 0
         while os.path.exists(model_path):
             model_inc += 1
-            model_path = "{}-{}".format(os.path.join(model_base_path,
+            model_path = "{}_{}".format(os.path.join(self.model_base_path,
                                                      self.model_name), model_inc)
 
         return model_path
@@ -135,50 +153,109 @@ class DQN:
 def main():
     model_name = sys.argv[1] if len(sys.argv) > 1 else "DQN"
     trials = 10000
+    num_steps = np.array([])
+    step_rewards = np.array([])
     dqn_agent = DQN(model_name)
-    strategy_list = [
-        Random(),
-        Weighted({"attack": 2, "ahead": 3, "wait": 0}),
-        Basic(),
-        Attack(),
-        Erratic(3),
-    ]
-
     env = gym.make("kkt-v1")
 
+    def train_end():
+        print("\n\n\n===============================================\nTrials: {}".format(
+            len(num_steps)))
+        avg_s = np.mean(num_steps)
+        print("Average Number of Steps: {:0.2f}".format(avg_s))
+        print("Number of steps distribution \n\t10%: {:0.2f} \t25%: {:0.2f} \t50%: {:0.2f} \t75%: {:0.2f} \t99%: {:0.2f}".format(
+            *np.percentile(num_steps, [10, 25, 50, 75, 99])))
+        print("Distribution of rewards: {}".format(Counter(step_rewards)))
+        dqn_agent.save_model("final.model")
+
+    def signal_handler(sig, frame):
+        train_end()
+        sys.exit(0)
+
+    def trial_game():
+        state = env.reset()
+        total_reward = 0
+        done = False
+        while not done:
+            action = dqn_agent.predict(state)
+            state, reward, done, _ = env.step(action)
+            total_reward += reward
+        return total_reward
+
+    def test():
+        results = np.array([])
+        wins = 0
+        for _ in range(100):
+            r = trial_game()
+            results = np.append(results, r)
+            won = r > 0
+            if won:
+                wins += 1
+            sys.stdout.write('W' if won else 'L')
+            sys.stdout.flush()
+
+        losses = len(results) - wins
+        print("\nAvg: {:0.2f}, W: {}, L: {}, Pct: {:0.2f}".format(
+            np.mean(results), wins, losses, wins/losses))
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    strategy_list = [
+        # Random(),
+        #Weighted({"attack": 2, "ahead": 3, "wait": 0}),
+        Basic(),
+        # Attack(),
+        # Erratic(3),
+    ]
+
     for trial in range(trials):
+        verbose = False  # trial != 0 and trial % 100 == 0
+        if not verbose:
+            sys.stdout.write('.')
+            sys.stdout.flush()
         cur_state = env.reset()
         total_reward = 0
         done = False
-        pct = 0
+        # pct = 0
         steps = 0
         strat = choice(strategy_list)
-        print("\n\nTrial {}, Strategy: {}".format(trial, strat.name()))
+        if verbose:
+            print("\n\nTrial {}, Strategy: {}, Epsilon: {}".format(
+                trial, strat.name(), dqn_agent.epsilon))
 
         while not done:
-            if (cur_state['elapsed'] / 2000) > (pct + 1) / 100:
-                pct += 1
-                sys.stdout.write('.')
-                sys.stdout.flush()
+            # if not verbose:
+            #     if (cur_state['elapsed'] / 2000) > (pct + 1) / 100:
+            #         pct += 1
+            #         sys.stdout.write('.')
+            #         sys.stdout.flush()
 
             action = dqn_agent.act(cur_state, strat)
             new_state, reward, done, _ = env.step(action)
-
-            # reward = reward if not done else -20
             total_reward += reward
-            new_state = new_state
             dqn_agent.remember(cur_state, action, reward, new_state, done)
 
-            dqn_agent.replay()       # internally iterates default (prediction) model
+            # internally iterates default (prediction) model
+            expected_reward = dqn_agent.replay()
+            if verbose and expected_reward is not None:
+                print(" - Step {}, Reward: {}, Expected Reward: {:0.2f}".format(steps,
+                                                                                reward, expected_reward))
             dqn_agent.target_train()  # iterates target model
 
             cur_state = new_state
+            step_rewards = np.append(step_rewards, reward)
             steps += 1
 
-        print("\nScore: {}, Steps: {}".format(reward, steps))
+        num_steps = np.append(num_steps, steps)
+        if verbose:
+            print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 100 == 0 or reward > 0:
-            dqn_agent.save_model("trial-{}.model".format(trial))
+        if trial % 100 == 99 and trial >= 199:
+            print("\nTesting at Trial {}".format(trial))
+            test()
+            dqn_agent.save_model("trial_{}.model".format(trial))
+
+    train_end()
 
 
 if __name__ == "__main__":

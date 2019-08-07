@@ -1,6 +1,7 @@
 import json
 import gym
 import numpy as np
+from math import trunc
 from gym import error, spaces, utils
 from gym.utils import seeding
 from subprocess import Popen, PIPE
@@ -20,9 +21,9 @@ class KnocketEnv(gym.Env):
         reward = 0
         for dmg in self.state["damages"]:
             if dmg["dealt"]:
-                reward += (dmg['amount'] / 99) * 0.5
+                reward += trunc(dmg['amount'] / 20)
             else:
-                reward -= (dmg['amount'] / 99) * 0.5
+                reward -= trunc(dmg['amount'] / 20)
 
         return reward
 
@@ -43,7 +44,7 @@ class KnocketEnv(gym.Env):
             reward = self.calculate_reward()
             if "outcome" in self.state:
                 self.done = True
-                reward += 0.50 if self.state["outcome"] == "winner" else -0.50
+                # reward += 1 if self.state["outcome"] == "winner" else -1
         else:
             self.state = {}
             reward = 0

@@ -63,7 +63,7 @@
     {
       "id": "modeltrial",
       "description": "Model Trial:",
-      "default": "0",
+      "default": "final",
       "type": "promptString"
     }
   ]
