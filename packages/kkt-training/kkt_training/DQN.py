@@ -41,11 +41,11 @@ class DQN:
         self.gamma = 0.999
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        # reach 0.5 after ~4,000 trials of 80 steps each
-        self.epsilon_decay = 0.9999978339
+        # reach 0.5 after ~10,000 trials of ~80 steps each
+        self.epsilon_decay = 0.5 ** (1 / (10000 * 80))
         # don't start decreasing epsilon until ~1000 trials of 80 steps have passed
         self.epsilon_decay_delay = 1000 * 80
-        self.learning_rate = 0.001
+        self.learning_rate = 0.01
         self.steps = 0
         self.tau = .125
 
@@ -152,7 +152,6 @@ class DQN:
 
 def main():
     model_name = sys.argv[1] if len(sys.argv) > 1 else "DQN"
-    trials = 10000
     num_steps = np.array([])
     step_rewards = np.array([])
     dqn_agent = DQN(model_name)
@@ -208,9 +207,11 @@ def main():
         # Erratic(3),
     ]
 
-    for trial in range(trials):
+    trial = 0
+    while True:
+        trial += 1
         verbose = False  # trial != 0 and trial % 100 == 0
-        if not verbose:
+        if not verbose and trial % 10 == 0:
             sys.stdout.write('.')
             sys.stdout.flush()
         cur_state = env.reset()
@@ -250,7 +251,7 @@ def main():
         if verbose:
             print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 100 == 99 and trial >= 199:
+        if trial % 1000 == 0 and trial >= 200:
             print("\nTesting at Trial {}".format(trial))
             test()
             dqn_agent.save_model("trial_{}.model".format(trial))
