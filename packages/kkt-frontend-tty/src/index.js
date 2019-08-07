@@ -11,6 +11,15 @@ import type {
 } from '../../kkt-battle/types/GameState.types';
 
 const HEADING_ARROWS: Array<string> = ['↖', '↗', '→', '↘', '↙', '←'];
+const MOVE_ICONS: { [string]: string } = {
+  ahead: '↑',
+  reverse: '↓',
+  attack: '!',
+  rotatecw: '→',
+  rotateccw: '←',
+  defend: 'X',
+  wait: '·',
+};
 
 const COLORS = {
   red: '\x1b[31m',
@@ -18,6 +27,8 @@ const COLORS = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
 };
+
+let modelMessage = '';
 
 const displayPoint = (p: Point, state: GameState): string => {
   const { bots = [] } = state;
@@ -52,12 +63,23 @@ const render = async (state: GameState): Promise<void> => {
         '\n',
     );
   }
-  const botColors = _.mapValues(_.keyBy(bots, 'id'), 'color');
   process.stdout.write('\n\n');
-  history.slice(0, 5).forEach((h) => {
-    const { botId, type } = h;
-    process.stdout.write(COLORS[botColors[botId]] + type + '\x1b[0m\n');
+  bots.forEach((b) => {
+    process.stdout.write(COLORS[b.color]);
+    history
+      .filter((h) => h.botId == b.id)
+      .slice(0, 100)
+      .forEach((h) => {
+        let { type } = h;
+        if (type == 'rotate') {
+          type += h.clockwise ? 'cw' : 'ccw';
+        }
+        process.stdout.write(MOVE_ICONS[type]);
+      });
+    process.stdout.write('\x1b[0m\n');
   });
+
+  process.stdout.write(modelMessage + '\n');
 
   if (!quitting) {
     await sleep(150);
@@ -107,6 +129,10 @@ events.on('error', (err) => {
   // eslint-disable-next-line no-console
   console.error(err);
   process.exit();
+});
+
+events.on('model-data', (message) => {
+  modelMessage = message;
 });
 
 const tty: Frontend = { events, render };

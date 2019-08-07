@@ -23,8 +23,7 @@ play.stdout.setEncoding('utf8');
 play.stderr.setEncoding('utf8');
 
 play.stderr.on('data', (message) => {
-  // eslint-disable-next-line no-console
-  console.error('model err: ', message);
+  frontend.events.emit('model-data', message);
 });
 
 play.on('close', (code) => {
