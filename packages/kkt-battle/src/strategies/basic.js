@@ -11,7 +11,7 @@ const rotate = () => ({
   options: { clockwise: !!(Math.random() < 0.5) },
 });
 
-const random = () => async (
+const basic = () => async (
   sensorData: SensorData,
   final: boolean,
 ): Promise<?Move> => {
@@ -46,4 +46,4 @@ const random = () => async (
   return { type: 'ahead' };
 };
 
-export default random;
+export default basic;

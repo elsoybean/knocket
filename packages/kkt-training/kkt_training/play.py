@@ -33,7 +33,7 @@ while not done:
     data = json.loads(line)
     state = e.encode_state(data).reshape(1, -1)
     probs = trained_model.predict(state)[0]
-    action = e.actions[np.argmax(probs)]
+    action = np.random.choice(e.actions, p=probs)
     print('Probs: ', probs, 'Action: ', action, file=sys.stderr)
     sys.stderr.flush()
     print(action)

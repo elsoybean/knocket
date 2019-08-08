@@ -51,11 +51,11 @@ class KnocketEnv(gym.Env):
 
         return [self.state, reward, self.done, {}]
 
-    def reset(self):
+    def reset(self, proficiency):
         if self.kkt:
             self.kkt.kill()
 
-        self.kkt = Popen(['node', self.runner, self.versus],
+        self.kkt = Popen(['node', self.runner, self.versus, "{:0.2f}".format(proficiency)],
                          universal_newlines=True, stdout=PIPE, stdin=PIPE)
         self.done = False
         line = self.kkt.stdout.readline()

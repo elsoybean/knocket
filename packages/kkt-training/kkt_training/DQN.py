@@ -45,12 +45,15 @@ class DQN:
         self.epsilon_decay = 0.5 ** (1 / (10000 * 80))
         # don't start decreasing epsilon until ~1000 trials of 80 steps have passed
         self.epsilon_decay_delay = 1000 * 80
-        self.learning_rate = 0.01
+
+        self.learning_rate = 0.001
+        self.batch_size = 32
+
         self.steps = 0
         self.tau = .125
 
-        # Target remembering about 2 zero reward steps for every reward step
-        self.bias_against_zero_reward = 0.91748153
+        # Target remembering about 3 zero reward steps for every reward step
+        self.bias_against_zero_reward = 0.876222295
 
         # warm up for ~100 games of 80 steps before we attempt to train at all
         self.min_memory_length = 100 * 80
@@ -86,7 +89,7 @@ class DQN:
     def predict(self, state):
         encoded_state = self.encoder.encode_state(state).reshape(1, -1)
         prediction = self.model.predict(encoded_state)
-        return self.encoder.actions[np.argmax(prediction)]
+        return choice(self.encoder.actions, p=prediction)
 
     def remember(self, state, action, reward, new_state, done):
         # Discard most zero reward steps
@@ -95,30 +98,32 @@ class DQN:
 
         encoded_state = self.encoder.encode_state(state).reshape(1, -1)
         encoded_new_state = self.encoder.encode_state(new_state).reshape(1, -1)
-        encoded_action = self.encoder.encode_action(action)
+        encoded_action = self.encoder.actions.index(action)
         self.memory.append(
             [encoded_state, encoded_action, reward, encoded_new_state, done])
 
     def replay(self):
-        batch_size = 200
-        if len(self.memory) < batch_size or self.steps < self.min_memory_length:
+        # or self.steps < self.min_memory_length:
+        if len(self.memory) < self.batch_size:
             return
 
-        samples = random.sample(self.memory, batch_size)
+        batch_x = np.empty((0, 430), float)
+        batch_y = np.empty((0, 7), float)
+        samples = random.sample(self.memory, self.batch_size)
         for sample in samples:
             #pylint: disable=W0633
             state, action, reward, new_state, done = sample
+            batch_x = np.vstack((batch_x, state[0]))
             target = self.target_model.predict(state)
             if done:
-                expected_reward = reward
+                target[0][action] = reward
             else:
                 Q_future = max(self.target_model.predict(
                     new_state)[0])
-                expected_reward = reward + Q_future * self.gamma
+                target[0][action] = reward + Q_future * self.gamma
+            batch_y = np.vstack((batch_y, target[0]))
 
-            target[0][action] = expected_reward
-            self.model.train_on_batch(state, target)
-            return expected_reward
+        return self.model.train_on_batch(batch_x, batch_y)
 
     def target_train(self):
         weights = self.model.get_weights()
@@ -211,10 +216,11 @@ def main():
     while True:
         trial += 1
         verbose = False  # trial != 0 and trial % 100 == 0
-        if not verbose and trial % 10 == 0:
+        if not verbose and trial % 1 == 0:
             sys.stdout.write('.')
             sys.stdout.flush()
-        cur_state = env.reset()
+        proficiency = choice([1, 0.8, 0.5, 0], p=[0.3, 0.4, 0.2, 0.1])
+        cur_state = env.reset(proficiency=proficiency)
         total_reward = 0
         done = False
         # pct = 0
@@ -237,10 +243,10 @@ def main():
             dqn_agent.remember(cur_state, action, reward, new_state, done)
 
             # internally iterates default (prediction) model
-            expected_reward = dqn_agent.replay()
-            if verbose and expected_reward is not None:
-                print(" - Step {}, Reward: {}, Expected Reward: {:0.2f}".format(steps,
-                                                                                reward, expected_reward))
+            loss = dqn_agent.replay()
+            if verbose and loss is not None:
+                print(
+                    " - Step {}, Reward: {}, Loss: {:0.2f}".format(steps, reward, loss))
             dqn_agent.target_train()  # iterates target model
 
             cur_state = new_state
@@ -251,7 +257,8 @@ def main():
         if verbose:
             print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 1000 == 0 and trial >= 200:
+        if trial % 100 == 0 and trial >= 200:
+            print("Last Loss: ", loss)
             print("\nTesting at Trial {}".format(trial))
             test()
             dqn_agent.save_model("trial_{}.model".format(trial))

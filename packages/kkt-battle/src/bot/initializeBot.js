@@ -13,7 +13,11 @@ const initializeBot = (
 ): Bot => {
   const {
     color,
-    strategy: { type: strategyType, options: strategyOptions } = {},
+    strategy: {
+      type: strategyType,
+      proficiency = 1,
+      options: strategyOptions,
+    } = {},
   } = config;
 
   const heading = Math.floor(Math.random() * 6);
@@ -33,6 +37,7 @@ const initializeBot = (
     color,
     defending,
     strategy,
+    proficiency,
     heading,
     position,
     cooldown,

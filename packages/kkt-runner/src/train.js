@@ -8,8 +8,10 @@ import type { BotConfig } from '../../kkt-battle/types/GameState.types';
 
 process.stdin.setEncoding('utf8');
 
+const [, , type, proficiency] = process.argv;
+
 const botConfigs: Array<BotConfig> = [
-  { color: 'red', strategy: { type: 'basic' } },
+  { color: 'red', strategy: { type, proficiency } },
   {
     color: 'yellow',
     strategy: {

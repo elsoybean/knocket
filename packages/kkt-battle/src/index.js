@@ -3,6 +3,7 @@
 import EventEmitter from 'events';
 import { initializeField } from './field';
 import { initializeBot, readSensors, reset } from './bot';
+import { random as randomStrategy } from './strategies';
 import * as moves from './moves';
 
 import type { Bot, GameState, BattleOptions } from '../types/GameState.types';
@@ -78,7 +79,7 @@ const battle = async ({
         keepRunning = false;
       } else {
         const activeBot = aliveBots.sort((a, b) => a.cooldown - b.cooldown)[0];
-        const { cooldown: elapsed } = activeBot;
+        const { cooldown: elapsed, proficiency } = activeBot;
         state.elapsed += elapsed;
         aliveBots.forEach((bot) => {
           bot.cooldown -= elapsed;
@@ -87,7 +88,12 @@ const battle = async ({
 
         const sensorData = readSensors(activeBot, state);
         events.emit('sensor', sensorData);
-        const { strategy } = activeBot;
+        let strategy;
+        if (Math.random() < proficiency) {
+          ({ strategy } = activeBot);
+        } else {
+          strategy = randomStrategy;
+        }
         const move = await strategy(sensorData);
         await applyMove(activeBot, move, state);
         if (render) {
