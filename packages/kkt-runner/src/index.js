@@ -21,14 +21,16 @@ const play = spawn('python', ['-m', 'kkt_training.play', model_file], {
 
 play.stdout.setEncoding('utf8');
 play.stderr.setEncoding('utf8');
+let lastErr;
 
 play.stderr.on('data', (message) => {
+  lastErr = message;
   frontend.events.emit('model-data', message);
 });
 
 play.on('close', (code) => {
   // eslint-disable-next-line no-console
-  console.error('model exited with', code);
+  console.error('model exited with', code && lastErr);
   process.exit();
 });
 

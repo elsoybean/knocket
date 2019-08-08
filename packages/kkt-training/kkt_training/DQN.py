@@ -41,10 +41,10 @@ class DQN:
         self.gamma = 0.999
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        # reach 0.5 after ~10,000 trials of ~80 steps each
-        self.epsilon_decay = 0.5 ** (1 / (10000 * 80))
+        # reach 0.5 after ~1,000 trials of ~80 steps each
+        self.epsilon_decay = 0.5 ** (1 / (1000 * 80))
         # don't start decreasing epsilon until ~1000 trials of 80 steps have passed
-        self.epsilon_decay_delay = 1000 * 80
+        self.epsilon_decay_delay = 100 * 80
 
         self.learning_rate = 0.001
         self.batch_size = 32
@@ -55,8 +55,8 @@ class DQN:
         # Target remembering about 3 zero reward steps for every reward step
         self.bias_against_zero_reward = 0.876222295
 
-        # warm up for ~100 games of 80 steps before we attempt to train at all
-        self.min_memory_length = 100 * 80
+        # warm up for ~20 games of 80 steps before we attempt to train at all
+        self.min_memory_length = 20 * 80
 
         self.model = self.create_model()
         print(self.model.summary())
@@ -89,7 +89,7 @@ class DQN:
     def predict(self, state):
         encoded_state = self.encoder.encode_state(state).reshape(1, -1)
         prediction = self.model.predict(encoded_state)
-        return choice(self.encoder.actions, p=prediction)
+        return choice(self.encoder.actions, p=prediction[0])
 
     def remember(self, state, action, reward, new_state, done):
         # Discard most zero reward steps
@@ -177,7 +177,7 @@ def main():
         sys.exit(0)
 
     def trial_game():
-        state = env.reset()
+        state = env.reset(proficiency=1.0)
         total_reward = 0
         done = False
         while not done:
@@ -258,8 +258,8 @@ def main():
             print("Score: {}, Steps: {}".format(reward, steps))
 
         if trial % 100 == 0 and trial >= 200:
-            print("Last Loss: ", loss)
-            print("\nTesting at Trial {}".format(trial))
+            print("\nLast Loss: ", loss)
+            print("Testing at Trial {}".format(trial))
             test()
             dqn_agent.save_model("trial_{}.model".format(trial))
 

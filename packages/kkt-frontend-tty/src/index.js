@@ -66,6 +66,7 @@ const render = async (state: GameState): Promise<void> => {
   process.stdout.write('\n\n');
   bots.forEach((b) => {
     process.stdout.write(COLORS[b.color]);
+    process.stdout.write(b.health + '  ');
     history
       .filter((h) => h.botId == b.id)
       .slice(0, 100)
