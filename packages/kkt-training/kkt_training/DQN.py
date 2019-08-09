@@ -38,22 +38,24 @@ class DQN:
 
         self.memory = deque(maxlen=10000000)
 
-        self.gamma = 0.999
+        # Move at step 1 should be worth about 1% of a reward at step 80
+        self.gamma = 0.01 ** (1 / 80)
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        # reach 0.5 after ~1,000 trials of ~80 steps each
-        self.epsilon_decay = 0.5 ** (1 / (1000 * 80))
-        # don't start decreasing epsilon until ~1000 trials of 80 steps have passed
+        # reach 0.5 after ~2,000 trials of ~80 steps each
+        self.epsilon_decay = 0.5 ** (1 / (2000 * 80))
+        # don't start decreasing epsilon until ~100 trials of 80 steps have passed
         self.epsilon_decay_delay = 100 * 80
 
         self.learning_rate = 0.001
         self.batch_size = 32
 
         self.steps = 0
-        self.tau = .125
+        self.tau = 0.333
 
         # Target remembering about 3 zero reward steps for every reward step
-        self.bias_against_zero_reward = 0.876222295
+        #self.bias_against_zero_reward = 0.876222295
+        self.bias_against_zero_reward = 0
 
         # warm up for ~20 games of 80 steps before we attempt to train at all
         self.min_memory_length = 20 * 80
@@ -77,16 +79,16 @@ class DQN:
         final_target = os.path.join(model_path, "final_target.model")
         model_inc = 0
         checkpoint = os.path.join(
-            model_path, "checkpoint_" + model_inc + ".model")
+            model_path, "checkpoint_{}.model".format(model_inc))
         while os.path.exists(model_path):
             model_inc += 1
             checkpoint = os.path.join(
-                model_path, "checkpoint_" + model_inc + ".model")
+                model_path, "checkpoint_{}.model".format(model_inc))
         self.model = load_model(final_model)
         self.target_model = load_model(final_target)
         os.rename(final_model, checkpoint)
         os.rename(final_target, os.path.join(
-            model_path, "checkpoint_" + model_inc + "_target.model"))
+            model_path, "checkpoint_{}_target.model".format(model_inc)))
 
     def create_model(self):
         model = Sequential()
@@ -280,7 +282,7 @@ def main():
         if verbose:
             print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 100 == 0 and trial >= 200:
+        if trial % 500 == 0 and trial >= 200:
             print("\nLast Loss: ", loss)
             print("Testing at Trial {}".format(trial))
             test()
