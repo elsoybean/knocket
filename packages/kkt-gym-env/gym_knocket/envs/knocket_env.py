@@ -31,6 +31,7 @@ class KnocketEnv(gym.Env):
         print(action, file=self.kkt.stdin)
         self.kkt.stdin.flush()
 
+        line = None
         try:
             line = self.kkt.stdout.readline()
         except:
@@ -41,7 +42,8 @@ class KnocketEnv(gym.Env):
 
         if not self.done:
             self.state = json.loads(line)
-            reward = self.calculate_reward()
+            #reward = self.calculate_reward()
+            reward = 1 if self.state.get("outcome", "n/a") == "winner" else 0
             if "outcome" in self.state:
                 self.done = True
                 # reward += 1 if self.state["outcome"] == "winner" else -1

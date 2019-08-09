@@ -21,7 +21,7 @@ from collections import deque
 from keras.optimizers import Adam
 from keras.layers import Dense
 from keras.models import Sequential
-from keras.models import model_from_json
+from keras.models import load_model
 from .encoder import Encoder
 from .strategy import Random
 from .strategy import Weighted
@@ -58,13 +58,35 @@ class DQN:
         # warm up for ~20 games of 80 steps before we attempt to train at all
         self.min_memory_length = 20 * 80
 
-        self.model = self.create_model()
-        print(self.model.summary())
-
-        self.target_model = self.create_model()
         self.model_name = model_name
         self.model_base_path = './models/dqn_models/'
         self.model_path = None
+
+        self.load_or_create_model()
+
+    def load_or_create_model(self):
+        model_path = os.path.join(self.model_base_path, self.model_name)
+        final_model = os.path.join(model_path, "final.model")
+        if not os.path.exists(final_model):
+            self.model = self.create_model()
+            self.target_model = self.create_model()
+        else:
+            self.load_last_model(model_path, final_model)
+
+    def load_last_model(self, model_path, final_model):
+        final_target = os.path.join(model_path, "final_target.model")
+        model_inc = 0
+        checkpoint = os.path.join(
+            model_path, "checkpoint_" + model_inc + ".model")
+        while os.path.exists(model_path):
+            model_inc += 1
+            checkpoint = os.path.join(
+                model_path, "checkpoint_" + model_inc + ".model")
+        self.model = load_model(final_model)
+        self.target_model = load_model(final_target)
+        os.rename(final_model, checkpoint)
+        os.rename(final_target, os.path.join(
+            model_path, "checkpoint_" + model_inc + "_target.model"))
 
     def create_model(self):
         model = Sequential()
@@ -150,9 +172,10 @@ class DQN:
             os.makedirs(self.model_path)
 
         new_fn = os.path.join(self.model_path, fn)
-        print('Saving ' + new_fn)
+        print('Saving ' + new_fn + ".model")
 
-        self.model.save(new_fn)
+        self.model.save(new_fn + ".model")
+        self.target_model.save(new_fn + "_target.model")
 
 
 def main():
@@ -170,7 +193,7 @@ def main():
         print("Number of steps distribution \n\t10%: {:0.2f} \t25%: {:0.2f} \t50%: {:0.2f} \t75%: {:0.2f} \t99%: {:0.2f}".format(
             *np.percentile(num_steps, [10, 25, 50, 75, 99])))
         print("Distribution of rewards: {}".format(Counter(step_rewards)))
-        dqn_agent.save_model("final.model")
+        dqn_agent.save_model("final")
 
     def signal_handler(sig, frame):
         train_end()
@@ -200,7 +223,7 @@ def main():
 
         losses = len(results) - wins
         print("\nAvg: {:0.2f}, W: {}, L: {}, Pct: {:0.2f}".format(
-            np.mean(results), wins, losses, wins/losses))
+            np.mean(results), wins, losses, wins/(wins+losses)))
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -261,7 +284,7 @@ def main():
             print("\nLast Loss: ", loss)
             print("Testing at Trial {}".format(trial))
             test()
-            dqn_agent.save_model("trial_{}.model".format(trial))
+            dqn_agent.save_model("trial_{}".format(trial))
 
     train_end()
 
