@@ -1,6 +1,7 @@
 //@flow
 
 import EventEmitter from 'events';
+import type { Move } from './Move.types';
 
 export type Point = {
   x: number,
@@ -49,6 +50,7 @@ export type HistoryItem = {
   | { type: 'ahead' }
   | { type: 'rotate', clockwise: boolean }
   | { type: 'attack', target?: string, damage: number }
+  | { type: 'checkpoint', state: GameState }
 );
 
 export type GameConfig = {
@@ -64,6 +66,8 @@ export type Frontend = {
 export type BattleOptions = {
     gameConfig: GameConfig,
     frontend: Frontend,
+    state: GameState,
+    move: Move,
 };
 
 export type ProximityReadingType = 'bot' | 'wall' | 'nothing';

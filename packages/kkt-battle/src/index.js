@@ -12,20 +12,48 @@ import type { Move } from '../types/Move.types';
 const battle = async ({
   gameConfig: { fieldSize = 5, botConfigs = [] },
   frontend: { render, events = new EventEmitter() },
+  state: runningState,
+  move,
 }: BattleOptions): Promise<void> => {
   try {
-    const field = initializeField(fieldSize);
-    const startPositions = [];
-    const bots = botConfigs.map((config) =>
-      initializeBot(field, startPositions, config, events),
-    );
+    let state: GameState;
+    if (!runningState) {
+      const field = initializeField(fieldSize);
+      const startPositions = [];
+      const bots = botConfigs.map((config) =>
+        initializeBot(field, startPositions, config, events),
+      );
 
-    const state: GameState = {
-      elapsed: 0,
-      steps: 0,
-      field,
-      bots,
-      history: [],
+      state = {
+        elapsed: 0,
+        steps: 0,
+        field,
+        bots,
+        history: [],
+      };
+    } else {
+      state = runningState;
+      if (move) {
+        const { bots } = state;
+        const activeBot = bots
+          .filter((bot) => bot.health > 0)
+          .sort((a, b) => a.cooldown - b.cooldown)[0];
+        await applyMove(activeBot, move, state);
+      }
+    }
+
+    const makeCheckpoint = (state: GameState) => {
+      const moveHistory = state.history.filter((h) => h.type != 'checkpoint');
+      const checkpoint = {
+        botId: 'n/a',
+        elapsed: 0,
+        type: 'checkpoint',
+        state: {
+          ...state,
+          history: moveHistory,
+        },
+      };
+      state.history.unshift(checkpoint);
     };
 
     const applyMove = async (
@@ -42,9 +70,13 @@ const battle = async ({
       bot.cooldown = historyItem.elapsed;
       bot.moveHistory.unshift(historyItem);
       state.history.unshift(historyItem);
+      state.steps++;
     };
 
-    let keepRunning = true;
+    makeCheckpoint(state);
+
+    let keepRunning = true,
+      pausing = false;
 
     events.on('quit', () => {
       keepRunning = false;
@@ -54,6 +86,12 @@ const battle = async ({
     if (render) {
       await render(state);
     }
+
+    events.on('pause', (state: GameState) => {
+      makeCheckpoint(state);
+      pausing = true;
+      keepRunning = false;
+    });
 
     while (keepRunning) {
       const { bots, elapsed } = state;
@@ -97,15 +135,18 @@ const battle = async ({
           strategy = randomStrategy;
         }
         const move = await strategy(sensorData);
-        await applyMove(activeBot, move, state);
-        state.steps++;
+        if (move) {
+          await applyMove(activeBot, move, state);
+        }
         if (render) {
           await render(state);
         }
       }
     }
 
-    events.emit('done');
+    if (!pausing) {
+      events.emit('done');
+    }
   } catch (err) {
     events.emit('error', err);
   }
