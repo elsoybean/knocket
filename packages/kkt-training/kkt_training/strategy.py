@@ -37,11 +37,12 @@ class Weighted(Strategy):
         return choice(actions, p=self.probabilities)
 
 
-class Basic(Strategy):
+class Explorer(Strategy):
     def act(self, state):
-        if state["proximity"][0]["type"] == "bot":
+        facing = state["proximity"][0]
+        if facing["type"] == "bot" and facing["damage"] != "total":
             return "attack"
-        if state["proximity"][0]["type"] == "wall":
+        if facing["type"] == "wall" or facing["type"] == "bot":
             return choice(["rotatecw", "rotateccw"])
         return choice(["rotatecw", "rotateccw", "ahead", "ahead", "ahead", "reverse"])
 
@@ -54,3 +55,19 @@ class Erratic(Strategy):
         last_moves = [Encoder.move_to_action(
             h) for h in state.get("moveHistory", [])[:self.length]]
         return choice(list(set(actions) - set(last_moves)))
+
+
+class Hunter(Strategy):
+    def act(self, state):
+        facing = state["proximity"][0]
+        if facing["type"] == "bot" and facing["damage"] != "total":
+            return "attack"
+        if facing.get("damage", "") == "total":
+            return choice(["rotatecw", "rotateccw"])
+        if state["compass"][0]:
+            return "ahead"
+        if state["compass"][1] or state["compass"][2]:
+            return "rotatecw"
+        if state["compass"][4] or state["compass"][5]:
+            return "rotateccw"
+        return choice(["rotatecw", "rotateccw"])

@@ -18,17 +18,20 @@ const attack = async (
 
   let damage = 0;
   if (hitBot) {
-    damage = Math.floor(
-      20 +
-        20 *
-          Math.random() *
-          (hitBot.defending ? 0.2 : hitBot.attacking ? 1.5 : 1.0),
-    );
+    const base = 10 + 5 * Math.random();
+    let factor = hitBot.defending ? 0.2 : hitBot.attacking ? 1.5 : 1.0;
+    if (hitBot.heading == heading) {
+      factor *= 2;
+    }
+    if (hitBot.heading == (heading + 3) % 6) {
+      factor *= 0.5;
+    }
+    damage = Math.floor(base * factor);
     hitBot.health = Math.max(0, hitBot.health - damage);
   }
   bot.attacking = true;
 
-  const elapsed = 4 + 2 * Math.random();
+  const elapsed = 4 + Math.random();
   return {
     botId: bot.id,
     type: 'attack',

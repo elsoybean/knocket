@@ -10,7 +10,7 @@ const rotate = async (
 ): Promise<HistoryItem> => {
   const { clockwise = true } = options || {};
   bot.heading = (bot.heading + (clockwise ? 1 : 5)) % 6;
-  const elapsed = 2 + Math.random();
+  const elapsed = 1.5 + Math.random();
   return { botId: bot.id, elapsed, type: 'rotate', clockwise };
 };
 

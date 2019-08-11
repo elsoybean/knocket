@@ -66,7 +66,7 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
           (!heading.y || heading.y == h.y) &&
           (!heading.z || heading.z == h.z)
         ) {
-          compass[idx] = true;
+          compass[(6 + idx - bot.heading) % 6] = true;
         }
       });
     }

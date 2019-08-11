@@ -11,7 +11,7 @@ const rotate = () => ({
   options: { clockwise: !!(Math.random() < 0.5) },
 });
 
-const basic = () => async (
+const explorer = () => async (
   sensorData: SensorData,
   final: boolean,
 ): Promise<?Move> => {
@@ -28,11 +28,7 @@ const basic = () => async (
     return { type: 'attack' };
   }
 
-  if (
-    facing &&
-    (facing.type == 'wall' ||
-      (facing.type == 'bot' && facing.damage == 'total'))
-  ) {
+  if (facing && (facing.type == 'wall' || facing.type == 'bot')) {
     return rotate();
   }
 
@@ -46,4 +42,4 @@ const basic = () => async (
   return { type: 'ahead' };
 };
 
-export default basic;
+export default explorer;

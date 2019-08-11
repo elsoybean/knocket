@@ -8,6 +8,7 @@ import type { Bot, BotConfig, Field } from '../../types/GameState.types';
 
 const initializeBot = (
   field: Field,
+  startPositions: Array<int>,
   config: BotConfig,
   events: EventEmitter,
 ): Bot => {
@@ -21,13 +22,22 @@ const initializeBot = (
   } = config;
 
   const heading = Math.floor(Math.random() * 6);
-  const position = field[Math.floor(Math.random() * field.length)];
+
+  const choosePosition = (field: Array<Point>) =>
+    Math.floor(Math.random() * field.length);
+  let positionNum = choosePosition(field);
+  while (startPositions.includes(positionNum)) {
+    positionNum = choosePosition(field);
+  }
+  const position = field[positionNum];
+  startPositions.push(positionNum);
+
   const allOptions: Object = {
     ...strategyOptions,
     events,
   };
   const strategy = strategies[strategyType](allOptions);
-  const cooldown = Math.random() * 3;
+  const cooldown = Math.random();
   const defending = false;
   const health = 99;
   const id = uuid();

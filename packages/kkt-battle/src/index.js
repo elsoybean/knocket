@@ -15,12 +15,14 @@ const battle = async ({
 }: BattleOptions): Promise<void> => {
   try {
     const field = initializeField(fieldSize);
+    const startPositions = [];
     const bots = botConfigs.map((config) =>
-      initializeBot(field, config, events),
+      initializeBot(field, startPositions, config, events),
     );
 
     const state: GameState = {
       elapsed: 0,
+      steps: 0,
       field,
       bots,
       history: [],
@@ -96,6 +98,7 @@ const battle = async ({
         }
         const move = await strategy(sensorData);
         await applyMove(activeBot, move, state);
+        state.steps++;
         if (render) {
           await render(state);
         }

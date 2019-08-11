@@ -35,6 +35,7 @@ export type Field = Array<Point>;
 
 export type GameState = {
   elapsed: number,
+  steps: number,
   bots: Array<Bot>,
   field: Field,
   history: Array<HistoryItem>,

@@ -35,14 +35,16 @@ play.on('close', (code) => {
 });
 
 const botConfigs: Array<BotConfig> = [
-  { color: 'blue', strategy: { type: 'basic' } },
-  {
-    color: 'yellow',
-    strategy: {
-      type: 'streams',
-      options: { input: play.stdout, output: play.stdin },
-    },
-  },
+  { color: 'green', strategy: { type: 'lump' } },
+  { color: 'red', strategy: { type: 'hunter' } },
+  { color: 'blue', strategy: { type: 'explorer' } },
+  // {
+  //   color: 'yellow',
+  //   strategy: {
+  //     type: 'streams',
+  //     options: { input: play.stdout, output: play.stdin },
+  //   },
+  // },
 ];
 
 const options = {

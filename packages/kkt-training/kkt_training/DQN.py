@@ -25,9 +25,10 @@ from keras.models import load_model
 from .encoder import Encoder
 from .strategy import Random
 from .strategy import Weighted
-from .strategy import Basic
+from .strategy import Explorer
 from .strategy import Attack
 from .strategy import Erratic
+from .strategy import Hunter
 
 
 class DQN:
@@ -38,27 +39,27 @@ class DQN:
 
         self.memory = deque(maxlen=10000000)
 
-        # Move at step 1 should be worth about 1% of a reward at step 80
-        self.gamma = 0.01 ** (1 / 80)
+        # Move at step 1 should be worth about 1% of a reward at step 1000
+        self.gamma = 0.01 ** (1 / 1000)
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        # reach 0.5 after ~2,000 trials of ~80 steps each
-        self.epsilon_decay = 0.5 ** (1 / (2000 * 80))
-        # don't start decreasing epsilon until ~100 trials of 80 steps have passed
-        self.epsilon_decay_delay = 100 * 80
+        # reach 0.5 after ~2,000 trials of ~1000 steps each
+        self.epsilon_decay = 0.5 ** (1 / (2000 * 1000))
+        # don't start decreasing epsilon until ~100 trials of 1000 steps have passed
+        self.epsilon_decay_delay = 100 * 1000
 
         self.learning_rate = 0.001
         self.batch_size = 32
 
         self.steps = 0
-        self.tau = 0.333
+        self.tau = 0.125
 
         # Target remembering about 3 zero reward steps for every reward step
         #self.bias_against_zero_reward = 0.876222295
-        self.bias_against_zero_reward = 0
+        self.bias_against_zero_reward = 0.999
 
-        # warm up for ~20 games of 80 steps before we attempt to train at all
-        self.min_memory_length = 20 * 80
+        # warm up for ~20 games of 1000 steps before we attempt to train at all
+        self.min_memory_length = 20 * 1000
 
         self.model_name = model_name
         self.model_base_path = './models/dqn_models/'
@@ -97,7 +98,7 @@ class DQN:
         model.add(Dense(24, activation="relu"))
         model.add(Dense(self.output_length, activation='softmax'))
         model.compile(loss='categorical_crossentropy',
-                      optimizer=Adam(lr=0.001), metrics=['accuracy'])
+                      optimizer=Adam(lr=self.learning_rate))
         return model
 
     def act(self, state, strat):
@@ -202,7 +203,7 @@ def main():
         sys.exit(0)
 
     def trial_game():
-        state = env.reset(proficiency=1.0)
+        state = env.reset()
         total_reward = 0
         done = False
         while not done:
@@ -230,22 +231,23 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     strategy_list = [
-        # Random(),
-        #Weighted({"attack": 2, "ahead": 3, "wait": 0}),
-        Basic(),
+        Random(),
+        Weighted({"attack": 2, "ahead": 4, "wait": 0}),
+        Explorer(),
+        Hunter(),
         # Attack(),
-        # Erratic(3),
+        Erratic(3),
     ]
 
     trial = 0
+    msg = ""
     while True:
         trial += 1
         verbose = False  # trial != 0 and trial % 100 == 0
-        if not verbose and trial % 1 == 0:
-            sys.stdout.write('.')
-            sys.stdout.flush()
-        proficiency = choice([1, 0.8, 0.5, 0], p=[0.3, 0.4, 0.2, 0.1])
-        cur_state = env.reset(proficiency=proficiency)
+        # if not verbose and trial % 1 == 0:
+        #     sys.stdout.write('.')
+        #     sys.stdout.flush()
+        cur_state = env.reset()
         total_reward = 0
         done = False
         # pct = 0
@@ -282,11 +284,17 @@ def main():
         if verbose:
             print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 500 == 0 and trial >= 200:
+        if trial % 250 == 0 and trial >= 200:
             print("\nLast Loss: ", loss)
             print("Testing at Trial {}".format(trial))
+            msg = ""
             test()
             dqn_agent.save_model("trial_{}".format(trial))
+        elif not verbose:
+            sys.stdout.write('\b' * len(msg))
+            msg = "T{:6d} - L = {:0.4f}".format(trial, loss if loss else 9999)
+            sys.stdout.write(msg)
+            sys.stdout.flush()
 
     train_end()
 
