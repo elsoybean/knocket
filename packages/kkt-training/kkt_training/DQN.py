@@ -82,7 +82,7 @@ class DQN:
         model_inc = 0
         checkpoint = os.path.join(
             model_path, "checkpoint_{}.model".format(model_inc))
-        while os.path.exists(model_path):
+        while os.path.exists(checkpoint):
             model_inc += 1
             checkpoint = os.path.join(
                 model_path, "checkpoint_{}.model".format(model_inc))
