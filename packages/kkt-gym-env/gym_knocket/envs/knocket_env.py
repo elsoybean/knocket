@@ -30,9 +30,9 @@ class KnocketEnv(gym.Env):
         reward = 0
         for dmg in self.state["damages"]:
             if dmg["dealt"]:
-                reward += trunc(dmg['amount'] / 20) * 0.25
+                reward += trunc(dmg['amount'] / 200) * 0.5
             else:
-                reward -= trunc(dmg['amount'] / 20) * 0.25
+                reward -= trunc(dmg['amount'] / 100) * 0.25
 
         return reward
 

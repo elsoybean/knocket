@@ -33,20 +33,21 @@ from .strategy import Hunter
 
 class DQN:
     def __init__(self, model_name):
+        avg_steps = 260
         self.input_length = Encoder.encoded_state_length  # 390
         self.output_length = len(Encoder.actions)  # 7
         self.encoder = Encoder()
 
         self.memory = deque(maxlen=10000000)
 
-        # Move at step 1 should be worth about 1% of a reward at step 1000
-        self.gamma = 0.01 ** (1 / 1000)
+        # Move at step 1 should be worth about 1% of a reward at end of trial
+        self.gamma = 0.01 ** (1 / avg_steps)
         self.epsilon = 1.0
         self.epsilon_min = 0.01
-        # reach 0.5 after ~2,000 trials of ~1000 steps each
-        self.epsilon_decay = 0.5 ** (1 / (2000 * 1000))
-        # don't start decreasing epsilon until ~100 trials of 1000 steps have passed
-        self.epsilon_decay_delay = 100 * 1000
+        # reach 0.5 after ~2,000 trials
+        self.epsilon_decay = 0.5 ** (1 / (2000 * avg_steps))
+        # don't start decreasing epsilon until ~100 trials have passed
+        self.epsilon_decay_delay = 100 * avg_steps
 
         self.learning_rate = 0.001
         self.batch_size = 32
@@ -55,11 +56,11 @@ class DQN:
         self.tau = 0.125
 
         # Target remembering about 3 zero reward steps for every reward step
-        #self.bias_against_zero_reward = 0.876222295
-        self.bias_against_zero_reward = 0.999
+        self.bias_against_zero_reward = 1 - (0.007518691 * 3)
 
-        # warm up for ~20 games of 1000 steps before we attempt to train at all
-        self.min_memory_length = 20 * 1000
+        # warm up for ~20 trials before we attempt to train at all
+        self.min_memory_length = 20 * \
+            (1 - self.bias_against_zero_reward) * avg_steps
 
         self.model_name = model_name
         self.model_base_path = './models/dqn_models/'
@@ -128,8 +129,7 @@ class DQN:
             [encoded_state, encoded_action, reward, encoded_new_state, done])
 
     def replay(self):
-        # or self.steps < self.min_memory_length:
-        if len(self.memory) < self.batch_size:
+        if len(self.memory) < self.batch_size or self.steps < self.min_memory_length:
             return
 
         batch_x = np.empty((0, 430), float)
