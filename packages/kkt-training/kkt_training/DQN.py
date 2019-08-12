@@ -69,28 +69,28 @@ class DQN:
         self.load_or_create_model()
 
     def load_or_create_model(self):
-        model_path = os.path.join(self.model_base_path, self.model_name)
-        final_model = os.path.join(model_path, "final.model")
+        self.model_path = os.path.join(self.model_base_path, self.model_name)
+        final_model = os.path.join(self.model_path, "final.model")
         if not os.path.exists(final_model):
             self.model = self.create_model()
             self.target_model = self.create_model()
         else:
-            self.load_last_model(model_path, final_model)
+            self.load_last_model(final_model)
 
-    def load_last_model(self, model_path, final_model):
-        final_target = os.path.join(model_path, "final_target.model")
+    def load_last_model(self, final_model):
+        final_target = os.path.join(self.model_path, "final_target.model")
         model_inc = 0
         checkpoint = os.path.join(
-            model_path, "checkpoint_{}.model".format(model_inc))
+            self.model_path, "checkpoint_{}.model".format(model_inc))
         while os.path.exists(checkpoint):
             model_inc += 1
             checkpoint = os.path.join(
-                model_path, "checkpoint_{}.model".format(model_inc))
+                self.model_path, "checkpoint_{}.model".format(model_inc))
         self.model = load_model(final_model)
         self.target_model = load_model(final_target)
         os.rename(final_model, checkpoint)
         os.rename(final_target, os.path.join(
-            model_path, "checkpoint_{}_target.model".format(model_inc)))
+            self.model_path, "checkpoint_{}_target.model".format(model_inc)))
 
     def create_model(self):
         model = Sequential()
