@@ -40,6 +40,14 @@
       "group": "test"
     },
     {
+      "type": "npm",
+      "script": "server",
+      "label": "Server",
+      "path": "packages/kkt-runner/",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
       "label": "Train DQN",
       "type": "process",
       "command": "${config:python.pythonPath}",

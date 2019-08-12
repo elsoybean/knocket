@@ -1,5 +1,5 @@
 {
-  "name": "kkt-tty",
+  "name": "kkt-runner",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
@@ -12,14 +12,18 @@
     "generateFlowTypes": "flow-typed install",
     "prepublish": "npm run build",
     "battle:single": "node lib/index.js",
-    "battle:trial": "node lib/trial.js"
+    "battle:trial": "node lib/trial.js",
+    "server": "nodemon --watch lib lib/server.js"
   },
   "dependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/polyfill": "^7.4.4",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
     "gulp": "^4.0.2",
     "kkt-battle": "1.0.0",
+    "kkt-frontend-db": "1.0.0",
     "kkt-frontend-tty": "1.0.0"
   },
   "devDependencies": {
@@ -35,6 +39,7 @@
     "eslint-plugin-import": "^2.17.3",
     "flow-bin": "^0.100.0",
     "flow-typed": "^2.6.0",
+    "nodemon": "^1.19.1",
     "prettier": "^1.17.1",
     "rollup": "^1.14.3",
     "rollup-plugin-babel": "^4.3.2",

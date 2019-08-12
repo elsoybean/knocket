@@ -47,6 +47,7 @@ const initializeBot = (
     color,
     defending,
     strategy,
+    strategyConfig: { type: strategyType, options: strategyOptions },
     proficiency,
     heading,
     position,

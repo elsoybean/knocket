@@ -50,7 +50,7 @@ export type HistoryItem = {
   | { type: 'ahead' }
   | { type: 'rotate', clockwise: boolean }
   | { type: 'attack', target?: string, damage: number }
-  | { type: 'checkpoint', state: GameState }
+  | { type: 'initialState', state: GameState }
 );
 
 export type GameConfig = {
@@ -66,8 +66,6 @@ export type Frontend = {
 export type BattleOptions = {
     gameConfig: GameConfig,
     frontend: Frontend,
-    state: GameState,
-    move: Move,
 };
 
 export type ProximityReadingType = 'bot' | 'wall' | 'nothing';
