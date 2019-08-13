@@ -1,11 +1,13 @@
 //@flow
 
 import path from 'path';
-import frontend from 'kkt-frontend-tty';
+import ttyFrontend from 'kkt-frontend-tty';
 import battle from 'kkt-battle';
 import { spawn } from 'child_process';
 
 import type { BotConfig } from '../../kkt-battle/types/GameState.types';
+
+const frontend = ttyFrontend();
 
 const { MODEL_NAME = 'new_model', MODEL_TRIAL = '0' } = process.env;
 const filename =

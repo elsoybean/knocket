@@ -11,11 +11,17 @@ export type Point = {
 
 export type Heading = Point;
 
+export type StrategyConfig = {
+        type: string,
+        options?: Object,
+    };
+
 export type Bot = {
   id: string,
   position: Point,
   heading: number,
   strategy: (sensorData: SensorData) => Promise<?HistoryItem>,
+  strategyConfig: StrategyConfig,
   color: string,
   cooldown: number,
   health: number,
@@ -26,10 +32,7 @@ export type Bot = {
 
 export type BotConfig = {
     color: string,
-    strategy: {
-        type: string,
-        options?: Object,
-    }
+    strategy: StrategyConfig,
 };
 
 export type Field = Array<Point>;
@@ -89,3 +92,5 @@ export type SensorReading = {
 export type DamageRecord = { type: 'attack', dealt: boolean };
 
 export type SensorData = SensorReading & { previousReadings: Array<SensorReading>, damages: Array<DamageRecord> };
+
+export type SavedGame = { sensorData?: SensorData, state: GameState };

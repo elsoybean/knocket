@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { initializeField } from './field';
 import { initializeBot, readSensors, reset } from './bot';
 import { random as randomStrategy } from './strategies';
+import createStrategy from './bot/createStrategy';
 import * as moves from './moves';
 
 import type {
@@ -60,10 +61,9 @@ const execute = async (state, render, events) => {
           await strategy(sensorData, true, false);
         }),
       );
-      events.emit('win', 'draw', state);
+      events.emit('draw', state);
       keepRunning = false;
     } else if (aliveBots.length == 1) {
-      const { color: winner } = aliveBots[0];
       await Promise.all(
         bots.map(async (bot) => {
           const sensorData = readSensors(bot, state);
@@ -71,7 +71,7 @@ const execute = async (state, render, events) => {
           await strategy(sensorData, true, bot.health > 0);
         }),
       );
-      events.emit('win', winner, state);
+      events.emit('win', aliveBots[0], state);
       keepRunning = false;
     } else {
       const activeBot = aliveBots.sort((a, b) => a.cooldown - b.cooldown)[0];
@@ -111,6 +111,11 @@ const resume = async (
   { render, events }: Frontend,
 ): Promise<void> => {
   try {
+    state.bots.forEach((b) => {
+      const { strategyConfig: { type, options } = {} } = b;
+      b.strategy = createStrategy(type, options, events);
+    });
+
     if (move) {
       const { bots } = state;
       const activeBot = bots

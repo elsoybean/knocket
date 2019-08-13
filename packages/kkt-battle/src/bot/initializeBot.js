@@ -1,7 +1,7 @@
 //@flow
 
 import { v4 as uuid } from 'uuid';
-import * as strategies from '../strategies';
+import createStrategy from './createStrategy';
 
 import type EventEmitter from 'events';
 import type { Bot, BotConfig, Field } from '../../types/GameState.types';
@@ -32,11 +32,7 @@ const initializeBot = (
   const position = field[positionNum];
   startPositions.push(positionNum);
 
-  const allOptions: Object = {
-    ...strategyOptions,
-    events,
-  };
-  const strategy = strategies[strategyType](allOptions);
+  const strategy = createStrategy(strategyType, strategyOptions, events);
   const cooldown = Math.random();
   const defending = false;
   const health = 99;
