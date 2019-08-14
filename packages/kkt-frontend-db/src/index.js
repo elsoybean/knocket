@@ -11,7 +11,8 @@ let _client;
 const dbFrontend = () => {
   config();
   const events = new EventEmitter();
-  let sensorData;
+  let sensorData,
+    complete = false;
 
   const connect = async () => {
     if (!_client) {
@@ -23,30 +24,34 @@ const dbFrontend = () => {
     return _client.db();
   };
 
-  events.on('init', async (state) => {
-    const db = await connect();
-    await db
-      .collection('games')
-      .insertOne({ _id: state.id, state, complete: false });
-  });
+  // events.on('init', async (state) => {
+  //   console.log('init');
+  //   const db = await connect();
+  //   await db
+  //     .collection('games')
+  //     .insertOne({ _id: state.id, state, complete: false });
+  //   console.log('finish init');
+  // });
 
   events.on('win', async (winner: Bot, state: GameState) => {
+    complete = true;
     const db = await connect();
     await db.collection('games').updateOne(
       { _id: state.id },
       {
-        $set: { state, winner, complete: true },
+        $set: { state, winner, complete },
         $unset: { sensorData: true },
       },
     );
   });
 
   events.on('draw', async (state: GameState) => {
+    complete = true;
     const db = await connect();
     await db.collection('games').updateOne(
       { _id: state.id },
       {
-        $set: { state, complete: true },
+        $set: { state, complete },
         $unset: { sensorData: true },
       },
     );
@@ -62,11 +67,15 @@ const dbFrontend = () => {
   });
 
   const render = async (state: GameState) => {
-    const db = await connect();
     if (sensorData) {
+      const db = await connect();
       await db
         .collection('games')
-        .updateOne({ _id: state.id }, { $set: { sensorData, state } });
+        .updateOne(
+          { _id: state.id },
+          { $set: { sensorData, state, complete } },
+          { upsert: true },
+        );
     }
   };
 

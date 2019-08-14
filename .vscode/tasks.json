@@ -6,6 +6,11 @@
     {
       "type": "npm",
       "script": "dev",
+      "options": {
+        "shell": {
+          "executable": "C:\\Windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe"
+        }
+      },
       "label": "Background Build Watcher",
       "isBackground": true,
       "problemMatcher": [],
@@ -21,6 +26,9 @@
       "path": "packages/kkt-runner/",
       "problemMatcher": [],
       "options": {
+        "shell": {
+          "executable": "C:\\Windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe"
+        },
         "env": {
           "MODEL_NAME": "${input:modelname}",
           "MODEL_TRIAL": "${input:modeltrial}"
@@ -34,6 +42,11 @@
     {
       "type": "npm",
       "script": "battle:trial",
+      "options": {
+        "shell": {
+          "executable": "C:\\Windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe"
+        }
+      },
       "label": "Set of Battles",
       "path": "packages/kkt-runner/",
       "problemMatcher": [],
@@ -42,6 +55,11 @@
     {
       "type": "npm",
       "script": "server",
+      "options": {
+        "shell": {
+          "executable": "C:\\Windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe"
+        }
+      },
       "label": "Server",
       "path": "packages/kkt-runner/",
       "problemMatcher": [],
@@ -62,8 +80,9 @@
     },
     {
       "label": "DB",
-      "type": "shell",
-      "command": "docker run --rm -it -p 27017 --name kkt-db mongo",
+      "type": "process",
+      "command": "docker",
+      "args": ["run", "--rm", "-it", "-p", "27017", "--name", "kkt-db", "mongo"],
       "group": "test"
     }
   ],

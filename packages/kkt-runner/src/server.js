@@ -35,12 +35,19 @@ app.post('/api/battle', async (req, res) => {
 app.get('/api/battle/:id', async (req, res) => {
   const frontend = dbFrontend();
   const { params: { id } = {} } = req;
-  const {
-    sensorData,
-    complete,
-    winner: { color: winner = 'draw' } = {},
-  } = await frontend.loadBattle(id);
-  res.send({ id, complete, winner, sensorData });
+  const battle = await frontend.loadBattle(id);
+  if (!battle) {
+    res.status(404).send({ error: 'No battle with that id' });
+  } else {
+    const { sensorData, complete, winner: { color: winner } = {} } =
+      battle || {};
+    res.send({
+      id,
+      complete,
+      ...(complete ? { winner: winner || 'draw' } : {}),
+      sensorData,
+    });
+  }
 });
 
 app.post('/api/battle/:id', async (req, res) => {
@@ -71,5 +78,8 @@ app.post('/api/battle/:id', async (req, res) => {
     res.send({ id, complete, winner, sensorData });
   }
 });
+
+app.use(express.static('public'));
+app.use('/js', express.static('lib/webui'));
 
 app.listen(3000);
