@@ -1,6 +1,7 @@
 //@flow
 
 import React, { useState, useEffect } from 'react';
+import HeadsUpDisplay from './HeadsUpDisplay';
 
 const App = () => {
   const [gameId, setGameId] = useState();
@@ -67,9 +68,9 @@ const App = () => {
   const handleAction = async (action) => {
     const move =
       action == 'rotatecw'
-        ? { type: 'rotate', clockwise: true }
+        ? { type: 'rotate', options: { clockwise: true } }
         : action == 'rotateccw'
-        ? { type: 'rotate', clockwise: false }
+        ? { type: 'rotate', options: { clockwise: false } }
         : { type: action };
     const res = await fetch('/api/battle/' + gameId, {
       method: 'POST',
@@ -86,28 +87,70 @@ const App = () => {
 
   return (
     <div>
-      <h3>Playing Game: {gameId}</h3>
-      <div>{JSON.stringify(sensorData)}</div>
+      <HeadsUpDisplay sensorData={sensorData} />
       {gameId && !complete && (
-        <div>
-          {[
-            'attack',
-            'ahead',
-            'rotatecw',
-            'rotateccw',
-            'reverse',
-            'defend',
-            'wait',
-          ].map((a) => (
+        <div style={{ textAlign: 'center' }}>
+          <div>
             <button
-              key={a}
               onClick={() => {
-                handleAction(a);
+                handleAction('attack');
               }}
             >
-              {a}
+              Attack
             </button>
-          ))}
+          </div>
+
+          <div>
+            <button
+              onClick={() => {
+                handleAction('ahead');
+              }}
+            >
+              Ahead
+            </button>
+          </div>
+
+          <div>
+            <button
+              onClick={() => {
+                handleAction('rotateccw');
+              }}
+            >
+              Rotate Left
+            </button>
+            <button
+              onClick={() => {
+                handleAction('wait');
+              }}
+            >
+              Wait
+            </button>
+            <button
+              onClick={() => {
+                handleAction('rotatecw');
+              }}
+            >
+              Rotate Right
+            </button>
+          </div>
+          <div>
+            <button
+              onClick={() => {
+                handleAction('reverse');
+              }}
+            >
+              Reverse
+            </button>
+          </div>
+          <div>
+            <button
+              onClick={() => {
+                handleAction('defend');
+              }}
+            >
+              Defend
+            </button>
+          </div>
         </div>
       )}
       {gameId && complete && (

@@ -39,12 +39,13 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
     }
     const otherBot = bots.find((b) => _.isEqual(b.position, newPosition));
     if (otherBot) {
-      const { moveHistory: [lastMove] = [] } = otherBot;
+      const { color, moveHistory: [lastMove] = [] } = otherBot;
       return {
         location: h,
         type: 'bot',
         damage: estimateDamage(otherBot),
         heading: otherBot.heading,
+        color,
         lastMove,
       };
     }
@@ -80,6 +81,7 @@ const readSensors = (bot: Bot, state: GameState): SensorData => {
     damage,
     heading: bot.heading,
     compass,
+    color: bot.color,
   };
   const previousReadings = [...bot.sensorMemory];
   bot.sensorMemory = [reading, ...previousReadings].slice(0, 3);

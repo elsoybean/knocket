@@ -76,7 +76,7 @@ export default [
       }),
       commonjs({
         namedExports: {
-          react: ['useState', 'useEffect'],
+          react: ['useState', 'useEffect', 'useRef'],
         },
       }),
       babel({

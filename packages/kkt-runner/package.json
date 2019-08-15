@@ -23,6 +23,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "gulp": "^4.0.2",
+    "hex-to-rgba": "^2.0.1",
     "kkt-battle": "1.0.0",
     "kkt-frontend-db": "1.0.0",
     "kkt-frontend-tty": "1.0.0",
