@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 import GameBoard from './GameBoard';
+import GameReplay from './GameReplay';
 import BotControls from './BotControls';
 
 const App = () => {
@@ -10,14 +11,22 @@ const App = () => {
   const [sensorData, setSensorData] = useState();
   const [complete, setComplete] = useState();
   const [winner, setWinner] = useState();
+  const [history, setHistory] = useState();
 
-  const handleNewSensorData = ({ id, sensorData, complete, winner }) => {
+  const handleNewSensorData = ({
+    id,
+    sensorData,
+    complete,
+    winner,
+    state: { history } = {},
+  }) => {
     if (id && id != gameId) {
       setGameId(id);
     }
     setSensorData(sensorData);
     setComplete(complete);
     setWinner(winner);
+    setHistory(history);
   };
 
   useEffect(() => {
@@ -60,15 +69,20 @@ const App = () => {
 
   return (
     <div>
-      <GameBoard sensorData={sensorData} />
       {gameId && !complete && (
-        <BotControls gameId={gameId} onNewSensorData={handleNewSensorData} />
+        <>
+          <GameBoard sensorData={sensorData} size={50} />
+          <BotControls gameId={gameId} onNewSensorData={handleNewSensorData} />
+        </>
       )}
       {gameId && complete && (
-        <div>
-          <h4>Winner: {winner || '- draw -'}</h4>
-          <button onClick={handleStartGame}>Start New Game</button>
-        </div>
+        <>
+          <GameReplay history={history} size={37} />
+          <div>
+            <h4>Winner: {winner || '- draw -'}</h4>
+            <button onClick={handleStartGame}>Start New Game</button>
+          </div>
+        </>
       )}
       {!gameId && (
         <div>

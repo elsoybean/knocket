@@ -4,19 +4,20 @@ import React, { useRef, useEffect } from 'react';
 import { WIDTH, HEIGHT } from './constants';
 import * as hexes from './hexes';
 
-import type { ProximityReading } from '../../../../../../kkt-battle/types/GameState.types';
+import type { ProximityReading } from '../../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   proximity: Array<ProximityReading>,
+  size: number,
 };
 
-const ProximityHexes = ({ proximity = [] }: Props) => {
+const ProximityHexes = ({ proximity = [], size }: Props) => {
   const fieldRef = useRef(null);
 
   useEffect(() => {
     const canvas = fieldRef.current;
     const ctx = canvas.getContext('2d');
-    ctx.translate(WIDTH / 2, HEIGHT / 2);
+    ctx.translate(canvas.width / 2, canvas.height / 2);
   }, []);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const ProximityHexes = ({ proximity = [] }: Props) => {
 
     proximity.forEach((p) => {
       const { type } = p;
-      hexes[type](ctx, p);
+      hexes[type](ctx, p, size);
     });
   }, [proximity]);
 

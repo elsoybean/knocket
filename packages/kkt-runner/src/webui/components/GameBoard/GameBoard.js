@@ -1,17 +1,16 @@
 //@flow
 
 import React from 'react';
-import ProximityHexes from './internal/ProximityHexes';
-import PlayerHex from './internal/PlayerHex';
-import { WIDTH, HEIGHT } from './internal/constants';
+import { ProximityHexes, PlayerHex, WIDTH, HEIGHT } from '../Field';
 
 import type { SensorData } from '../../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   sensorData: SensorData,
+  size: number,
 };
 
-const GameBoard = ({ sensorData }: Props) => {
+const GameBoard = ({ sensorData, size = 22 }: Props) => {
   const { proximity = [] } = sensorData || {};
 
   return (
@@ -23,8 +22,8 @@ const GameBoard = ({ sensorData }: Props) => {
         margin: '0 auto',
       }}
     >
-      <ProximityHexes proximity={proximity} />
-      <PlayerHex sensorData={sensorData} />
+      <ProximityHexes proximity={proximity} size={size} />
+      <PlayerHex sensorData={sensorData} size={size} />
     </div>
   );
 };

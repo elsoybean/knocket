@@ -6,19 +6,20 @@ import { WIDTH, HEIGHT } from './constants';
 import { heatSensor } from './sprites';
 import HexMatrix from './HexMatrix';
 
-import type { SensorData } from '../../../../../../kkt-battle/types/GameState.types';
+import type { SensorData } from '../../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   sensorData: SensorData,
+  size: number,
 };
 
-const PlayerHex = ({ sensorData }: Props) => {
+const PlayerHex = ({ sensorData, size }: Props) => {
   const playerRef = useRef(null);
 
   useEffect(() => {
     const canvas = playerRef.current;
     const ctx = canvas.getContext('2d');
-    ctx.translate(WIDTH / 2, HEIGHT / 2);
+    ctx.translate(canvas.width / 2, canvas.height / 2);
   }, []);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ const PlayerHex = ({ sensorData }: Props) => {
       heading,
     };
 
-    bot(ctx, hex);
+    bot(ctx, hex, size);
 
     ctx.fillStyle = 'orange';
     heatSensors.forEach((isOn, index) => {
@@ -52,7 +53,7 @@ const PlayerHex = ({ sensorData }: Props) => {
         sensorIcon.addPath(
           heatSensor,
           new HexMatrix()
-            .defaultScale()
+            .defaultScale(size)
             .rotate(60 * ((heading + index + 2) % 6)),
         );
         ctx.fill(sensorIcon);

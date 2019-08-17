@@ -4,6 +4,7 @@ import flow from 'rollup-plugin-flow';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
+import builtins from 'rollup-plugin-node-builtins';
 
 export default [
   {
@@ -61,6 +62,7 @@ export default [
   {
     input: 'src/webui/index.js',
     plugins: [
+      builtins(),
       resolve({
         preferBuiltins: true,
         browser: true,
@@ -77,6 +79,7 @@ export default [
       commonjs({
         namedExports: {
           react: ['useState', 'useEffect', 'useRef'],
+          'kkt-battle': ['applyToState'],
         },
       }),
       babel({

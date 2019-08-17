@@ -39,12 +39,12 @@ app.get('/api/battle/:id', async (req, res) => {
   if (!battle) {
     res.status(404).send({ error: 'No battle with that id' });
   } else {
-    const { sensorData, complete, winner: { color: winner } = {} } =
+    const { sensorData, state, complete, winner: { color: winner } = {} } =
       battle || {};
     res.send({
       id,
       complete,
-      ...(complete ? { winner: winner || 'draw' } : {}),
+      ...(complete ? { winner: winner || 'draw', state } : {}),
       sensorData,
     });
   }
@@ -75,7 +75,12 @@ app.post('/api/battle/:id', async (req, res) => {
 
     await resumeBattle(state, move, frontend);
 
-    res.send({ id, complete, winner, sensorData });
+    res.send({
+      id,
+      ...(complete ? { winner, state } : {}),
+      complete,
+      sensorData,
+    });
   }
 });
 

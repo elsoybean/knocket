@@ -3,9 +3,9 @@
 import hexToRgba from 'hex-to-rgba';
 import HexMatrix from '../HexMatrix';
 import { hexagon, robot } from '../sprites';
-import { THICKNESS } from '../constants';
 
-const bot = (ctx, proximityData): void => {
+const bot = (ctx, proximityData, size): void => {
+  const thickness = Math.floor(size / 10);
   const { location, color, damage, heading } = proximityData;
   const alpha =
     damage == 'minor'
@@ -17,7 +17,9 @@ const bot = (ctx, proximityData): void => {
       : 1;
   ctx.fillStyle = color;
   ctx.fillStyle = hexToRgba(ctx.fillStyle, alpha);
-  const hex = new HexMatrix().translateLocation(location).defaultScale();
+  const hex = new HexMatrix()
+    .translateLocation(size, location)
+    .defaultScale(size);
   const rotateMatrix = new HexMatrix().rotate(60 * ((heading - 4) % 6));
   const rotatedBot = new Path2D();
   rotatedBot.addPath(robot, rotateMatrix);
@@ -28,9 +30,9 @@ const bot = (ctx, proximityData): void => {
   const outside = new Path2D();
   outside.addPath(hexagon, hex);
   ctx.strokeStyle = color;
-  ctx.lineWidth = THICKNESS / 2;
+  ctx.lineWidth = thickness / 2;
   ctx.stroke(inside);
-  ctx.lineWidth = THICKNESS;
+  ctx.lineWidth = thickness;
   ctx.stroke(outside);
 };
 
