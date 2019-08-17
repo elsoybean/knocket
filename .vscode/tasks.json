@@ -54,6 +54,19 @@
     },
     {
       "type": "npm",
+      "script": "generateTrainingData",
+      "options": {
+        "shell": {
+          "executable": "C:\\Windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe"
+        }
+      },
+      "label": "Generate Training Data",
+      "path": "packages/kkt-runner/",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "type": "npm",
       "script": "server",
       "options": {
         "shell": {

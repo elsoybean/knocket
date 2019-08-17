@@ -70,6 +70,7 @@ const battleCycle = async (
       }
       const move = await strategy(sensorData);
       if (move) {
+        events.emit('moveChosen', activeBot, sensorData, move);
         const historyItem = executeMove(activeBot, move, state);
         applyToState(state, historyItem);
       }

@@ -72,6 +72,9 @@ class DQN:
         self.model_path = os.path.join(self.model_base_path, self.model_name)
         final_model = os.path.join(self.model_path, "final.model")
         if not os.path.exists(final_model):
+            if not os.path.exists(self.model_path):
+                print('Creating ' + self.model_path)
+                os.makedirs(self.model_path)
             self.model = self.create_model()
             self.target_model = self.create_model()
         else:
@@ -233,10 +236,13 @@ def main():
     strategy_list = [
         Random(),
         Weighted({"attack": 2, "ahead": 4, "wait": 0}),
+        Erratic(3),
+        Explorer(),
+        Explorer(),
         Explorer(),
         Hunter(),
-        # Attack(),
-        Erratic(3),
+        Hunter(),
+        Hunter(),
     ]
 
     trial = 0

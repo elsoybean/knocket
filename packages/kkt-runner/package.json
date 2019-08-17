@@ -13,6 +13,7 @@
     "prepublish": "npm run build",
     "battle:single": "node lib/index.js",
     "battle:trial": "node lib/trial.js",
+    "generateTrainingData": "node lib/generateTraining.js",
     "server": "nodemon --watch lib lib/server.js"
   },
   "dependencies": {
@@ -21,12 +22,14 @@
     "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.5.5",
     "body-parser": "^1.19.0",
+    "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "gulp": "^4.0.2",
     "hex-to-rgba": "^2.0.1",
     "kkt-battle": "1.0.0",
     "kkt-frontend-db": "1.0.0",
     "kkt-frontend-tty": "1.0.0",
+    "mongodb": "^3.3.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
   },

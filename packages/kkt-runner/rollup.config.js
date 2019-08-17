@@ -60,6 +60,19 @@ export default [
     },
   },
   {
+    input: 'src/generateTraining.js',
+    plugins: [
+      flow(),
+      babel({
+        exclude: 'node_modules/**',
+      }),
+    ],
+    output: {
+      file: 'lib/generateTraining.js',
+      format: 'cjs',
+    },
+  },
+  {
     input: 'src/webui/index.js',
     plugins: [
       builtins(),
