@@ -2,7 +2,7 @@
 
 import path from 'path';
 import ttyFrontend from 'kkt-frontend-tty';
-import battle from 'kkt-battle';
+import { start as startBattle } from 'kkt-battle';
 import { spawn } from 'child_process';
 
 import type { BotConfig } from '../../kkt-battle/types/GameState.types';
@@ -37,16 +37,16 @@ play.on('close', (code) => {
 });
 
 const botConfigs: Array<BotConfig> = [
-  // { color: 'green', strategy: { type: 'lump' } },
+  { color: 'green', strategy: { type: 'lump' } },
   { color: 'red', strategy: { type: 'hunter' } },
   { color: 'blue', strategy: { type: 'explorer' } },
-  {
-    color: 'yellow',
-    strategy: {
-      type: 'streams',
-      options: { input: play.stdout, output: play.stdin },
-    },
-  },
+  // {
+  //   color: 'yellow',
+  //   strategy: {
+  //     type: 'streams',
+  //     options: { input: play.stdout, output: play.stdin },
+  //   },
+  // },
 ];
 
 const options = {
@@ -55,5 +55,5 @@ const options = {
 };
 
 (async () => {
-  await battle(options);
+  await startBattle(options);
 })();

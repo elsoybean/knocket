@@ -3,7 +3,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import dbFrontend from 'kkt-frontend-db';
-import battle, { resume } from 'kkt-battle';
+import { start as startBattle, resume as resumeBattle } from 'kkt-battle';
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.post('/api/battle', async (req, res) => {
     sensorData = data;
   });
 
-  await battle({
+  await startBattle({
     gameConfig,
     frontend,
   });
@@ -73,7 +73,7 @@ app.post('/api/battle/:id', async (req, res) => {
       winner = 'draw';
     });
 
-    await resume(state, move, frontend);
+    await resumeBattle(state, move, frontend);
 
     res.send({ id, complete, winner, sensorData });
   }

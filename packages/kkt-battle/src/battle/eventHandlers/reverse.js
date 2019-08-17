@@ -1,11 +1,15 @@
 //@flow
 
 import _ from 'lodash';
-import { HEADINGS } from '../constants';
+import { HEADINGS } from '../../constants';
 
-import type { Bot, GameState, HistoryItem } from '../../types/GameState.types';
+import type {
+  Bot,
+  GameState,
+  HistoryItem,
+} from '../../../types/GameState.types';
 
-const reverse = async (bot: Bot, state: GameState): Promise<HistoryItem> => {
+const reverse = (state: GameState, historyItem: HistoryItem, bot: Bot) => {
   const { position, heading } = bot;
   const { field, bots } = state;
   const newPosition = _.mergeWith(
@@ -20,8 +24,6 @@ const reverse = async (bot: Bot, state: GameState): Promise<HistoryItem> => {
   ) {
     bot.position = newPosition;
   }
-  const elapsed = 1.5 + Math.random();
-  return { botId: bot.id, elapsed, type: 'reverse' };
 };
 
 export default reverse;

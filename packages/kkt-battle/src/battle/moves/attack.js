@@ -1,16 +1,15 @@
 //@flow
 
 import _ from 'lodash';
-import { HEADINGS } from '../constants';
+import { HEADINGS } from '../../constants';
 
-import type { Bot, GameState, HistoryItem } from '../../types/GameState.types';
-import type { AttackOptions } from '../../types/Move.types';
+import type {
+  Bot,
+  GameState,
+  HistoryItem,
+} from '../../../types/GameState.types';
 
-const attack = async (
-  bot: Bot,
-  state: GameState,
-  _options_?: AttackOptions,
-): Promise<HistoryItem> => {
+const attack = (bot: Bot, state: GameState): HistoryItem => {
   const { position, heading } = bot;
   const { bots } = state;
   const target = _.mergeWith({}, position, HEADINGS[heading], _.add);
@@ -27,9 +26,7 @@ const attack = async (
       factor *= 0.5;
     }
     damage = Math.floor(base * factor);
-    hitBot.health = Math.max(0, hitBot.health - damage);
   }
-  bot.attacking = true;
 
   const elapsed = 4 + Math.random();
   return {

@@ -2,7 +2,7 @@
 
 import EventEmitter from 'events';
 
-import battle from 'kkt-battle';
+import { start as startBattle } from 'kkt-battle';
 
 import type { BotConfig } from '../../kkt-battle/types/GameState.types';
 
@@ -36,5 +36,5 @@ const options = {
 };
 
 (async () => {
-  await battle(options);
+  await startBattle(options);
 })();

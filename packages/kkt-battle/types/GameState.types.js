@@ -1,7 +1,6 @@
 //@flow
 
 import EventEmitter from 'events';
-import type { Move } from './Move.types';
 
 export type Point = {
   x: number,
@@ -61,9 +60,11 @@ export type GameConfig = {
     botConfigs: Array<BotConfig>,
 };
 
+export type RenderFunction = (GameState) => Promise<void>;
+
 export type Frontend = {
     events: EventEmitter,
-    render: (GameState) => Promise<void>,
+    render: RenderFunction,
 };
 
 export type BattleOptions = {

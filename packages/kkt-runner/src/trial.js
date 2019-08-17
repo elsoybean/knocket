@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import EventEmitter from 'events';
-import battle from 'kkt-battle';
+import { start as startBattle } from 'kkt-battle';
 
 import type {
   BotConfig,
@@ -64,7 +64,7 @@ const botConfigs: Array<BotConfig> = [
       frontend: { events },
     };
 
-    await battle(options);
+    await startBattle(options);
   }
   _(results)
     .groupBy('winner')
