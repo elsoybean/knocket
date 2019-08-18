@@ -18,6 +18,7 @@ const dbFrontend = () => {
     if (!_client) {
       _client = await MongoClient.connect(process.env.MONGODB_URI, {
         useNewUrlParser: true,
+        useUnifiedTopology: true,
         poolSize: 10,
       });
     }

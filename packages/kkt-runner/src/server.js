@@ -86,5 +86,6 @@ app.post('/api/battle/:id', async (req, res) => {
 
 app.use(express.static('public'));
 app.use('/js', express.static('lib/webui'));
+app.use('/models', express.static('../../models'));
 
 app.listen(3000);

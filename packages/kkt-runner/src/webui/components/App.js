@@ -54,7 +54,7 @@ const App = () => {
         botConfigs: [
           {
             color: 'red',
-            strategy: { type: 'hunter' },
+            strategy: { type: 'model', options: { modelName: 'v2' } },
           },
           {
             color: 'blue',

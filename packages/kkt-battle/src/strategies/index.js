@@ -10,3 +10,4 @@ export { default as hunter } from './hunter';
 export { default as erratic } from './erratic';
 export { default as lump } from './lump';
 export { default as offline } from './offline';
+export { default as model } from './model';
