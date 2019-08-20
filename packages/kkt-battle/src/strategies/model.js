@@ -1,7 +1,8 @@
 //@flow
 
 import path from 'path';
-import * as tf from '@tensorflow/tfjs';
+//import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node-gpu';
 import { encodeSensorData, ACTIONS } from '../model/encoder';
 
 import type { Move } from '../../types/Move.types';

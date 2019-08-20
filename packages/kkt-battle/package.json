@@ -18,6 +18,8 @@
     "@babel/polyfill": "^7.4.4",
     "@babel/runtime": "^7.5.5",
     "@tensorflow/tfjs": "^1.2.7",
+    "@tensorflow/tfjs-node": "^1.2.7",
+    "@tensorflow/tfjs-node-gpu": "^1.2.7",
     "gulp": "^4.0.2",
     "lodash": "^4.17.15",
     "uuid": "^3.3.2"

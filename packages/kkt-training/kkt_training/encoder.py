@@ -30,6 +30,8 @@ class Encoder:
 
     @staticmethod
     def move_to_action(move):
+        if (move == None):
+            return 'n/a'
         move_type = move.get('type', 'n/a')
         if move_type == 'rotate':
             move_type += 'cw' if move.get("clockwise") else 'ccw'
@@ -74,7 +76,7 @@ class Encoder:
     def encode_move_history(data):
         output = []
         for i in range(len(data)):
-            output += [data[i].get("elapsed", 0) / 10] + \
+            output += [data[i].get("elapsed", 0) / Encoder.max_time] + \
                 Encoder.encode_move(data[i])
         for i in range(len(data), 5):
             output += [0] + Encoder.encode_move({})

@@ -92,6 +92,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Train Basic",
+      "type": "process",
+      "command": "${config:python.pythonPath}",
+      "args": ["-m", "kkt_training.Basic", "${input:modelname}"],
+      "options": {
+        "cwd": "${workspaceRoot}",
+        "env": {
+          "PYTHONPATH": "${workspaceRoot}/packages/kkt-training"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "DB",
       "type": "process",
       "command": "docker",
