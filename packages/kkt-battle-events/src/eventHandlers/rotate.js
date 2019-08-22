@@ -4,7 +4,7 @@ import type {
   Bot,
   GameState,
   HistoryItem,
-} from '../../../types/GameState.types';
+} from '../../../kkt-battle/types/GameState.types';
 
 const rotate = (state: GameState, historyItem: HistoryItem, bot: Bot) => {
   const { clockwise = true } = historyItem;

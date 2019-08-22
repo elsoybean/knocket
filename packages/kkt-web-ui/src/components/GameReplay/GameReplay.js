@@ -1,8 +1,8 @@
 //@flow
 
 import React, { useEffect, useState } from 'react';
-import _ from 'lodash';
-import { applyToState } from 'kkt-battle';
+import _cloneDeep from 'lodash/cloneDeep';
+import { applyToState } from 'kkt-battle-events';
 import { FullBoard, WIDTH, HEIGHT } from '../Field';
 
 const TIME_SCALE = 100;
@@ -18,7 +18,7 @@ const GameReplay = ({ history = [], size = 22 }: Props) => {
 
   useEffect(() => {
     if (step > 0) {
-      const newState = _.cloneDeep(state);
+      const newState = _cloneDeep(state);
       const historyItem = history[step - 1];
       applyToState(newState, historyItem);
       setState(newState);

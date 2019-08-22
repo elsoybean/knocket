@@ -1,6 +1,6 @@
 //@flow
 
-import type { Heading } from '../../types/GameState.types';
+import type { Heading } from '../../../kkt-battle/types/GameState.types';
 
 const HEADINGS: Array<Heading> = [
   { x: -1, y: 0, z: 1 },

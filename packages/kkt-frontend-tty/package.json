@@ -9,6 +9,7 @@
     "bundle": "rollup --config",
     "bundlewatch": "rollup --config -w",
     "dev": "npm run build:watch",
+    "lint": "eslint src",
     "generateFlowTypes": "flow-typed install",
     "prepublish": "npm run build"
   },

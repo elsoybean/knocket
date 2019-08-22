@@ -19,7 +19,6 @@ const COMMAND_MAP: { [string]: Move } = {
 const streams = ({
   input,
   output,
-  events,
 }: {
   input: ReadableStream,
   output: WritableStream,

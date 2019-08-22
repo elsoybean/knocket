@@ -1,11 +1,11 @@
 //@flow
 
 import React, { useRef, useEffect } from 'react';
-import _ from 'lodash';
+import _isEqual from 'lodash/isEqual';
 import { WIDTH, HEIGHT } from './constants';
 import { none as noneHex, bot as botHex } from './hexes';
 
-import type { GameState } from '../../../../../kkt-battle/types/GameState.types';
+import type { GameState } from '../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   state: GameState,
@@ -33,17 +33,17 @@ const FullBoard = ({ state = {}, size }: Props) => {
     const { field = [], bots = [] } = state;
 
     field.forEach((location) => {
-      const bot = bots.find((bot) => _.isEqual(bot.position, location));
+      const bot = bots.find((bot) => _isEqual(bot.position, location));
       if (bot) {
         const { color, health, heading } = bot;
         const damage =
           health == 0
             ? 'total'
             : health <= 50
-            ? 'major'
-            : health <= 90
-            ? 'minor'
-            : 'none';
+              ? 'major'
+              : health <= 90
+                ? 'minor'
+                : 'none';
         botHex(ctx, { color, damage, location, heading }, size);
       } else {
         noneHex(ctx, { location }, size);

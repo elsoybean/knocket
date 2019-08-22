@@ -6,7 +6,7 @@ import { WIDTH, HEIGHT } from './constants';
 import { heatSensor } from './sprites';
 import HexMatrix from './HexMatrix';
 
-import type { SensorData } from '../../../../../kkt-battle/types/GameState.types';
+import type { SensorData } from '../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   sensorData: SensorData,

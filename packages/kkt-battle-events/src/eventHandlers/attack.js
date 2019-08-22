@@ -4,7 +4,7 @@ import type {
   Bot,
   GameState,
   HistoryItem,
-} from '../../../types/GameState.types';
+} from '../../../kkt-battle/types/GameState.types';
 
 const attack = (state: GameState, historyItem: HistoryItem, bot: Bot) => {
   const { target: targetId, damage } = historyItem;

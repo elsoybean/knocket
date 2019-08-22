@@ -3,7 +3,7 @@
 import React from 'react';
 import { ProximityHexes, PlayerHex, WIDTH, HEIGHT } from '../Field';
 
-import type { SensorData } from '../../../../../kkt-battle/types/GameState.types';
+import type { SensorData } from '../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   sensorData: SensorData,

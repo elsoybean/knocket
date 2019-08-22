@@ -1,6 +1,5 @@
 /* eslint-disable flowtype/require-valid-file-annotation */
 import babel from 'rollup-plugin-babel';
-import flow from 'rollup-plugin-flow';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
@@ -9,71 +8,6 @@ import builtins from 'rollup-plugin-node-builtins';
 export default [
   {
     input: 'src/index.js',
-    plugins: [
-      flow(),
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
-    output: {
-      file: 'lib/index.js',
-      format: 'cjs',
-    },
-  },
-  {
-    input: 'src/server.js',
-    plugins: [
-      flow(),
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
-    output: {
-      file: 'lib/server.js',
-      format: 'cjs',
-    },
-  },
-  {
-    input: 'src/train.js',
-    plugins: [
-      flow(),
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
-    output: {
-      file: 'lib/train.js',
-      format: 'cjs',
-    },
-  },
-  {
-    input: 'src/trial.js',
-    plugins: [
-      flow(),
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
-    output: {
-      file: 'lib/trial.js',
-      format: 'cjs',
-    },
-  },
-  {
-    input: 'src/generateTraining.js',
-    plugins: [
-      flow(),
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
-    output: {
-      file: 'lib/generateTraining.js',
-      format: 'cjs',
-    },
-  },
-  {
-    input: 'src/webui/index.js',
     plugins: [
       builtins(),
       resolve({
@@ -92,7 +26,7 @@ export default [
       commonjs({
         namedExports: {
           react: ['useState', 'useEffect', 'useRef'],
-          'kkt-battle': ['applyToState'],
+          'kkt-battle-events': ['applyToState'],
         },
       }),
       babel({
@@ -111,7 +45,7 @@ export default [
       globals(),
     ],
     output: {
-      file: 'lib/webui/bundle.js',
+      file: 'lib/bundle.js',
       format: 'es',
     },
   },

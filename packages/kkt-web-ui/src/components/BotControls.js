@@ -24,8 +24,8 @@ const BotControls = ({ gameId, onNewSensorData }: Props) => {
       action == 'rotatecw'
         ? { type: 'rotate', options: { clockwise: true } }
         : action == 'rotateccw'
-        ? { type: 'rotate', options: { clockwise: false } }
-        : { type: action };
+          ? { type: 'rotate', options: { clockwise: false } }
+          : { type: action };
     const res = await fetch('/api/battle/' + gameId, {
       method: 'POST',
       headers: {

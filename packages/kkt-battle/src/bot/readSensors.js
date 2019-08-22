@@ -1,7 +1,7 @@
 //@flow
 
 import _ from 'lodash';
-import { HEADINGS } from '../constants';
+import { HEADINGS } from 'kkt-common';
 
 import type {
   Bot,

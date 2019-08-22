@@ -3,7 +3,7 @@
 import { readSensors, reset } from '../bot';
 import { random as randomStrategy } from '../strategies';
 import executeMove from './executeMove';
-import applyToState from './applyToState';
+import { applyToState } from 'kkt-battle-events';
 
 import type { GameState, RenderFunction } from '../../types/GameState.types';
 

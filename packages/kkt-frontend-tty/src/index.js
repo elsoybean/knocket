@@ -46,7 +46,7 @@ const displayPoint = (p: Point, state: GameState): string => {
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const ttyFrontend = () => {
+const ttyFrontend = (): Frontend => {
   let modelMessage = '';
   let quitting = false;
 

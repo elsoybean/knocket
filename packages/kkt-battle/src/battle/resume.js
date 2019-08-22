@@ -2,7 +2,7 @@
 
 import { createStrategy } from '../bot';
 import executeMove from './executeMove';
-import applyToState from './applyToState';
+import { applyToState } from 'kkt-battle-events';
 import battleCycle from './battleCycle';
 
 import type { GameState, Frontend } from '../../types/GameState.types';

@@ -4,7 +4,7 @@ import React, { useRef, useEffect } from 'react';
 import { WIDTH, HEIGHT } from './constants';
 import * as hexes from './hexes';
 
-import type { ProximityReading } from '../../../../../kkt-battle/types/GameState.types';
+import type { ProximityReading } from '../../../../kkt-battle/types/GameState.types';
 
 type Props = {
   proximity: Array<ProximityReading>,
