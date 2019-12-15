@@ -1,0 +1,293 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Knocket
+
+  SAM Template for knocket to run using a DynamoDB table and Lambda functions with the Websocket protocol on API Gateway.
+
+Parameters:
+  TableName:
+    Type: String
+    Default: 'battles'
+    Description: (Required) The name of the new DynamoDB to store battles for each connected client. Minimum 3 characters
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: ^[A-Za-z_]+$
+    ConstraintDescription: 'Required. Can be characters and underscore only. No numbers or special characters allowed.'
+
+Resources:
+  KnocketWebSocket:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: KnocketWebSocket
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: '$request.body.action'
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      RouteKey: $connect
+      AuthorizationType: NONE
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectInteg
+  ConnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      Description: Connect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnConnectFunction.Arn}/invocations
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DisconnectInteg
+  DisconnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OnDisconnectFunction.Arn}/invocations
+  StartBattleRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      RouteKey: startbattle
+      AuthorizationType: NONE
+      OperationName: StartBattleRoute
+      RouteResponseSelectionExpression: $default
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref StartBattleInteg
+  StartBattleInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      Description: Start Battle Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StartBattleMessageFunction.Arn}/invocations
+  StartBattleIntegResponse:
+    Type: AWS::ApiGatewayV2::IntegrationResponse
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      IntegrationId: !Ref StartBattleInteg
+      IntegrationResponseKey: /201/
+  StartBattleRouteResponse:
+    Type: 'AWS::ApiGatewayV2::RouteResponse'
+    Properties:
+      RouteId: !Ref StartBattleRoute
+      ApiId: !Ref KnocketWebSocket
+      RouteResponseKey: $default
+  MoveBotRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      RouteKey: movebot
+      AuthorizationType: NONE
+      OperationName: MoveBotRoute
+      RouteResponseSelectionExpression: $default
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref MoveBotInteg
+  MoveBotInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      Description: Move Bot Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MoveBotMessageFunction.Arn}/invocations
+  MoveBotIntegResponse:
+    Type: AWS::ApiGatewayV2::IntegrationResponse
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+      IntegrationId: !Ref MoveBotInteg
+      IntegrationResponseKey: /201/
+  MoveBotRouteResponse:
+    Type: 'AWS::ApiGatewayV2::RouteResponse'
+    Properties:
+      RouteId: !Ref MoveBotRoute
+      ApiId: !Ref KnocketWebSocket
+      RouteResponseKey: $default
+  Deployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - StartBattleRoute
+      - MoveBotRoute
+      - DisconnectRoute
+    Properties:
+      ApiId: !Ref KnocketWebSocket
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: Prod
+      Description: Prod Stage
+      DeploymentId: !Ref Deployment
+      ApiId: !Ref KnocketWebSocket
+  ConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: 'connectionId'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'connectionId'
+          KeyType: 'HASH'
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: True
+      TableName: !Ref TableName
+  OnConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: onconnect/
+      Handler: app.handler
+      MemorySize: 256
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+  OnConnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - KnocketWebSocket
+      - OnConnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnConnectFunction
+      Principal: apigateway.amazonaws.com
+  OnDisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ondisconnect/
+      Handler: app.handler
+      MemorySize: 256
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+  OnDisconnectPermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - KnocketWebSocket
+      - OnDisconnectFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref OnDisconnectFunction
+      Principal: apigateway.amazonaws.com
+  StartBattleMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: startbattle/
+      Handler: app.handler
+      MemorySize: 256
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'execute-api:ManageConnections'
+              Resource:
+                - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${KnocketWebSocket}/*'
+  StartBattleMessagePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - KnocketWebSocket
+      - StartBattleMessageFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref StartBattleMessageFunction
+      Principal: apigateway.amazonaws.com
+  MoveBotMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: movebot/
+      Handler: app.handler
+      MemorySize: 256
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'execute-api:ManageConnections'
+              Resource:
+                - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${KnocketWebSocket}/*'
+  MoveBotMessagePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - KnocketWebSocket
+      - MoveBotMessageFunction
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref MoveBotMessageFunction
+      Principal: apigateway.amazonaws.com
+
+Outputs:
+  ConnectionsTableArn:
+    Description: 'Connections table ARN'
+    Value: !GetAtt ConnectionsTable.Arn
+
+  OnConnectFunctionArn:
+    Description: 'OnConnect function ARN'
+    Value: !GetAtt OnConnectFunction.Arn
+
+  OnDisconnectFunctionArn:
+    Description: 'OnDisconnect function ARN'
+    Value: !GetAtt OnDisconnectFunction.Arn
+
+  StartBattleMessageFunctionArn:
+    Description: 'StartBattleMessage function ARN'
+    Value: !GetAtt StartBattleMessageFunction.Arn
+
+  MoveBotMessageFunctionArn:
+    Description: 'MoveBotMessage function ARN'
+    Value: !GetAtt MoveBotMessageFunction.Arn
+
+  WebSocketURI:
+    Description: 'The WSS Protocol URI to connect to'
+    Value:
+      !Join [
+        '',
+        [
+          'wss://',
+          !Ref KnocketWebSocket,
+          '.execute-api.',
+          !Ref 'AWS::Region',
+          '.amazonaws.com/',
+          !Ref 'Stage',
+        ],
+      ]
