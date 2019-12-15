@@ -1,6 +1,4 @@
 {
-  "packages": [
-    "packages/*"
-  ],
+  "packages": ["packages/*", "packages/kkt-aws/dependencies/nodejs"],
   "version": "0.0.0"
 }

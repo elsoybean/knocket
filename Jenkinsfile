@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                echo 'Deploying....'
+                samDeploy(region: 'us-east-1', credentialsId: 'knocket-aws', s3Bucket: 'knocket', s3Prefix: 'deployment', templateFile: 'packages/kkt-aws/template.yaml', stackName: 'knocket')
             }
         }
     }

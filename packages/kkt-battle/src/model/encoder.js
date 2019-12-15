@@ -11,7 +11,6 @@ const ACTIONS = [
   'defend',
 ];
 const PROXIMITY_TYPES = ['none', 'wall', 'bot'];
-const MAX_TIME = 2000;
 
 const encodeDamage = (damage: string = 'n/a') =>
   Array.from(Array(4), (d, i) => (damage == DAMAGE_ESTIMATES[i] ? 1 : 0));
@@ -46,14 +45,7 @@ const encodeProximity = ({
 const encodeHeatSensor = (heatSensors = []) =>
   Array.from(Array(6), (d, i) => (heatSensors[i] ? 1 : 0));
 
-const encodeReading = ({
-  elapsed = 0,
-  proximity = [],
-  damage,
-  heading,
-  compass,
-} = {}) => [
-  elapsed / MAX_TIME,
+const encodeReading = ({ proximity = [], damage, heading, compass } = {}) => [
   ...encodeProximity(proximity[0]),
   ...encodeProximity(proximity[1]),
   ...encodeProximity(proximity[2]),
@@ -65,11 +57,7 @@ const encodeReading = ({
 
 const encodeMoveHistory = (history = []) =>
   Array.from(Array(5), (d, i) => history[i] || {}).reduce(
-    (acc, { elapsed = 0, ...move } = {}) => [
-      ...acc,
-      elapsed / MAX_TIME,
-      ...encodeMove(move),
-    ],
+    (acc, move = {}) => [...acc, ...encodeMove(move)],
     [],
   );
 

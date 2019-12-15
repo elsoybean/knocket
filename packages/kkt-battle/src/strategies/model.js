@@ -1,8 +1,6 @@
 //@flow
 
-import path from 'path';
 import * as tf from '@tensorflow/tfjs-node';
-//import * as tf from '@tensorflow/tfjs-node-gpu';
 import { encodeSensorData, ACTIONS } from '../model/encoder';
 
 import type { Move } from '../../types/Move.types';
@@ -11,7 +9,7 @@ const _models = {};
 
 const model = ({ modelName }) => {
   if (!_models[modelName]) {
-    const modelPath = `http://localhost:3000/models/${modelName}/model.json`;
+    const modelPath = `file://../../models/${modelName}/model.json`;
     _models[modelName] = tf.loadLayersModel(modelPath);
   }
   const modelPromise = _models[modelName];

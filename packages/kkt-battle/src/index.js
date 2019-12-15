@@ -1,4 +1,4 @@
 //@flow
 
-import { start, resume, applyToState } from './battle';
-export { start, resume, applyToState };
+import { start, resume, executeMove, battleCycle } from './battle';
+export { start, resume, executeMove, battleCycle };
