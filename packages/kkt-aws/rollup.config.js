@@ -52,7 +52,7 @@ export default [
     plugins,
     output: {
       file: 'lib/movebot/app.js',
-      format: 'es',
+      format: 'cjs',
     },
   },
   {
@@ -60,7 +60,7 @@ export default [
     plugins,
     output: {
       file: 'lib/onconnect/app.js',
-      format: 'es',
+      format: 'cjs',
     },
   },
   {
@@ -68,7 +68,7 @@ export default [
     plugins,
     output: {
       file: 'lib/ondisconnect/app.js',
-      format: 'es',
+      format: 'cjs',
     },
   },
   {
@@ -76,7 +76,7 @@ export default [
     plugins,
     output: {
       file: 'lib/startbattle/app.js',
-      format: 'es',
+      format: 'cjs',
     },
   },
 ];
