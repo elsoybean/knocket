@@ -9,7 +9,7 @@ docker run -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins
 
 Install the following plugins
 
-- AWS CodeDeploy
-- AWS CodeBuild
+- AWS SAM
 - Http Request
 - File Operations
+- NodeJS

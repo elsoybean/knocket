@@ -4,7 +4,12 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building..'
+                nodejs(nodeJSInstallationName:"nodejs12.x") {
+                    sh label: 'Build', script: '''
+                        lerna bootstrap --no-ci
+                        lerna link
+                        '''
+                }
             }
         }
         stage('Test') {
