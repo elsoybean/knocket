@@ -153,12 +153,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: 'id'
           AttributeType: 'S'
-        - AttributeName: 'connectionId'
-          AttributeType: 'S'
       KeySchema:
         - AttributeName: 'id'
-          KeyType: 'HASH'
-        - AttributeName: 'connectionId'
           KeyType: 'HASH'
       ProvisionedThroughput:
         ReadCapacityUnits: 5
