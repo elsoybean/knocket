@@ -1,0 +1,19 @@
+{
+  "name": "kkt-aws",
+  "version": "1.0.0",
+  "description": "Lambdas for AWS",
+  "scripts": {
+    "build": "rollup --config",
+    "build:watch": "rollup --config -w",
+    "dev": "npm run build:watch",
+    "lint": "eslint src",
+    "generateFlowTypes": "flow-typed install",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "kkt-common": "1.0.0",
+    "kkt-battle": "1.0.0",
+    "kkt-battle-events": "1.0.0"
+  },
+  "author": "elsoybean"
+}

@@ -1,7 +1,7 @@
 // @flow
-const { start: startBattle } = require('kkt-battle');
+import { start as startBattle } from 'kkt-battle';
 
-exports.handler = async (event) => {
+const handler = async (event) => {
   const { body: { config: gameConfig } = {} } = event;
   gameConfig.botConfigs.push({ color: 'green', strategy: { type: 'offline' } });
 
@@ -14,3 +14,5 @@ exports.handler = async (event) => {
   };
   return response;
 };
+
+export { handler };

@@ -168,7 +168,7 @@ Resources:
     Properties:
       CodeUri: lambdas/onconnect/
       Handler: app.handler
-      MemorySize: 256
+      MemorySize: 128
       Runtime: nodejs12.x
       Environment:
         Variables:
@@ -191,7 +191,7 @@ Resources:
     Properties:
       CodeUri: lambdas/ondisconnect/
       Handler: app.handler
-      MemorySize: 256
+      MemorySize: 128
       Runtime: nodejs12.x
       Environment:
         Variables:
@@ -209,23 +209,12 @@ Resources:
       FunctionName: !Ref OnDisconnectFunction
       Principal: apigateway.amazonaws.com
 
-  KnocketDepLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      Description: Dependencies for knocket app
-      ContentUri: dependencies/
-      CompatibleRuntimes:
-        - nodejs12.x
-        - nodejs10.x
-
   StartBattleMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambdas/startbattle/
       Handler: app.handler
-      Layers:
-        - !Ref KnocketDepLayer
-      MemorySize: 256
+      MemorySize: 128
       Runtime: nodejs12.x
       Environment:
         Variables:
@@ -254,7 +243,7 @@ Resources:
     Properties:
       CodeUri: lambdas/movebot/
       Handler: app.handler
-      MemorySize: 256
+      MemorySize: 128
       Runtime: nodejs12.x
       Environment:
         Variables:

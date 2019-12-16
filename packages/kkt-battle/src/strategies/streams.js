@@ -1,5 +1,6 @@
 //@flow
 
+/*
 // $FlowFixMe - events does in fact export once
 import readline from 'readline';
 
@@ -53,5 +54,7 @@ const streams = ({
     }
   };
 };
+*/
+const streams = () => ({ type: 'wait' });
 
 export default streams;

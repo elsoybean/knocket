@@ -1,5 +1,6 @@
 //@flow
 
+/*
 import * as tf from '@tensorflow/tfjs-node';
 import { encodeSensorData, ACTIONS } from '../model/encoder';
 
@@ -36,5 +37,8 @@ const model = ({ modelName }) => {
         : { type: action };
   };
 };
+*/
+
+const model = () => ({ type: 'wait' });
 
 export default model;
