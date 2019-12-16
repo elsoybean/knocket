@@ -7,7 +7,7 @@ import builtins from 'rollup-plugin-node-builtins';
 import { terser } from 'rollup-plugin-terser';
 
 const plugins = [
-  builtins(),
+  builtins({ crypto: false }),
   resolve({
     preferBuiltins: true,
     browser: false,
@@ -45,11 +45,13 @@ const plugins = [
   }),
   globals(),
 ];
+const external = ['crypto'];
 
 export default [
   {
     input: 'src/movebot/app.js',
     plugins,
+    external,
     output: {
       file: 'lib/movebot/app.js',
       format: 'cjs',
@@ -58,6 +60,7 @@ export default [
   {
     input: 'src/onconnect/app.js',
     plugins,
+    external,
     output: {
       file: 'lib/onconnect/app.js',
       format: 'cjs',
@@ -66,6 +69,7 @@ export default [
   {
     input: 'src/ondisconnect/app.js',
     plugins,
+    external,
     output: {
       file: 'lib/ondisconnect/app.js',
       format: 'cjs',
@@ -74,6 +78,7 @@ export default [
   {
     input: 'src/startbattle/app.js',
     plugins,
+    external,
     output: {
       file: 'lib/startbattle/app.js',
       format: 'cjs',
