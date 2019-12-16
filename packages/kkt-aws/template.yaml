@@ -210,10 +210,10 @@ Resources:
       Principal: apigateway.amazonaws.com
 
   KnocketDepLayer:
-    Type: AWS::Lambda::LayerVersion
+    Type: AWS::Serverless::LayerVersion
     Properties:
       Description: Dependencies for knocket app
-      Content: dependencies/
+      ContentUri: dependencies/
       CompatibleRuntimes:
         - nodejs12.x
         - nodejs10.x
