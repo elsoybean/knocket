@@ -4,6 +4,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
+import { terser } from 'rollup-plugin-terser';
 
 const plugins = [
   builtins(),
@@ -11,6 +12,7 @@ const plugins = [
     preferBuiltins: true,
     browser: false,
   }),
+  terser(),
   babel({
     exclude: 'node_modules/**',
     babelrc: false,

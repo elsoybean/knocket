@@ -3,31 +3,59 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import dbFrontend from 'kkt-frontend-db';
-import { start as startBattle, resume as resumeBattle } from 'kkt-battle';
+import {
+  start as startBattle,
+  resume as resumeBattle,
+  battleCycle,
+  executeMove,
+} from 'kkt-battle';
+import { applyToState } from 'kkt-battle-events';
 
 const app = express();
 
 app.use(bodyParser.json());
 
 app.post('/api/battle', async (req, res) => {
-  const frontend = dbFrontend();
+  const { render, events } = dbFrontend();
   const gameConfig = req.body;
-  let sensorData = {},
-    id;
+  let sensorData = {};
   gameConfig.botConfigs.push({ color: 'green', strategy: { type: 'offline' } });
 
-  frontend.events.on('init', (data) => {
-    ({ id } = data);
-  });
-
-  frontend.events.on('pause', (data) => {
+  events.on('pause', (data) => {
     sensorData = data;
   });
 
-  await startBattle({
-    gameConfig,
-    frontend,
-  });
+  const state = await startBattle({ gameConfig });
+  const { id } = state;
+
+  let keepRunning = true;
+  while (keepRunning) {
+    const { result, bot, sensorData } = await battleCycle(state, render);
+    const {
+      color,
+      strategy,
+      strategyConfig: { type },
+    } = bot;
+    console.log('Stepping through Battle', color, type);
+    keepRunning = result == 'nextMove' && type != 'offline';
+
+    // let strategy;
+    // if (Math.random() < proficiency) {
+    //   ({ strategy } = activeBot);
+    // } else {
+    //   strategy = randomStrategy;
+    // }
+    if (type !== 'offline') {
+      const move = await strategy(sensorData);
+      if (move) {
+        const historyItem = executeMove(bot, move, state);
+        applyToState(state, historyItem);
+      }
+      if (render) {
+        await render(state);
+      }
+    }
+  }
 
   res.send({ id, sensorData });
 });
@@ -51,9 +79,9 @@ app.get('/api/battle/:id', async (req, res) => {
 });
 
 app.post('/api/battle/:id', async (req, res) => {
-  const frontend = dbFrontend();
+  const { render, events, loadBattle } = dbFrontend();
   const { params: { id } = {}, body: move } = req;
-  const { state, complete: alreadyComplete } = await frontend.loadBattle(id);
+  const { state, complete: alreadyComplete } = await loadBattle(id);
 
   if (alreadyComplete) {
     res.status(400).send({ error: 'Battle already over' });
@@ -61,23 +89,24 @@ app.post('/api/battle/:id', async (req, res) => {
     let sensorData,
       winner,
       complete = false;
-    frontend.events.on('pause', (data) => {
+    events.on('pause', (data) => {
       sensorData = data;
     });
-    frontend.events.on('win', (bot) => {
+    events.on('win', (bot) => {
       complete = true;
       winner = bot.color;
     });
-    frontend.events.on('draw', () => {
+    events.on('draw', () => {
       complete = true;
       winner = 'draw';
     });
 
-    await resumeBattle(state, move, frontend);
+    const newState = await resumeBattle(state, move);
+    await battleCycle(newState, render, events);
 
     res.send({
       id,
-      ...(complete ? { winner, state } : {}),
+      ...(complete ? { winner, state: newState } : {}),
       complete,
       sensorData,
     });
@@ -86,6 +115,5 @@ app.post('/api/battle/:id', async (req, res) => {
 
 app.use(express.static('public'));
 app.use('/js', express.static('./node_modules/kkt-web-ui/lib'));
-app.use('/models', express.static('../../models'));
 
 app.listen(3000);
