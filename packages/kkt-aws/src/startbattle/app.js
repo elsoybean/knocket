@@ -14,7 +14,7 @@ const handler = async (event) => {
     const state = await startBattle({ gameConfig });
     const { id } = state;
 
-    const { env: { TABLE_NAME = 'knocket-battles' } = {} } = process;
+    const { env: { TABLE_NAME = 'KnocketBattles' } = {} } = process;
     const ddb = new DynamoDB();
     const params = {
       TableName: TABLE_NAME,

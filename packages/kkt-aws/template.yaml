@@ -8,7 +8,7 @@ Description: >
 Parameters:
   TableName:
     Type: String
-    Default: 'knocket-battles'
+    Default: 'KnocketBattles'
     Description: (Required) The name of the new DynamoDB to store battles for each connected client. Minimum 3 characters
     MinLength: 3
     MaxLength: 50
