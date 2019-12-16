@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "link-parent-bin && lerna bootstrap && lerna link",
+    "bootstrap": "link-parent-bin && lerna bootstrap --no-ci && lerna link",
     "flow:generate": "lerna run generateFlowTypes",
     "dev": "lerna run dev --parallel"
   },
