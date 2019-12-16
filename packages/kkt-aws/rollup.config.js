@@ -45,7 +45,7 @@ const plugins = [
   }),
   globals(),
 ];
-const external = ['crypto'];
+const external = ['aws-sdk', 'crypto'];
 
 export default [
   {
