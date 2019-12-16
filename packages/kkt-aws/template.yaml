@@ -166,7 +166,7 @@ Resources:
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/onconnect/
+      CodeUri: lib/onconnect/
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
@@ -189,7 +189,7 @@ Resources:
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/ondisconnect/
+      CodeUri: lib/ondisconnect/
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
@@ -212,7 +212,7 @@ Resources:
   StartBattleMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/startbattle/
+      CodeUri: lib/startbattle/
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
@@ -241,7 +241,7 @@ Resources:
   MoveBotMessageFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambdas/movebot/
+      CodeUri: lib/movebot/
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
