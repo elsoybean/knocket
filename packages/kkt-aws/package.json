@@ -11,9 +11,10 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "kkt-common": "1.0.0",
+    "aws-sdk": "^2.591.0",
     "kkt-battle": "1.0.0",
-    "kkt-battle-events": "1.0.0"
+    "kkt-battle-events": "1.0.0",
+    "kkt-common": "1.0.0"
   },
   "author": "elsoybean"
 }

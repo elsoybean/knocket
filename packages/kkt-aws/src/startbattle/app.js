@@ -1,8 +1,9 @@
 // @flow
 import { start as startBattle } from 'kkt-battle';
+import { DynamoDB } from 'aws-sdk';
 
 const handler = async (event) => {
-  const { body = '{}' } = event;
+  const { body = '{}', requestContext: { connectionId } = {} } = event;
   try {
     const { config: gameConfig = { botConfigs: [] } } = JSON.parse(body);
     gameConfig.botConfigs.push({
@@ -13,9 +14,20 @@ const handler = async (event) => {
     const state = await startBattle({ gameConfig });
     const { id } = state;
 
+    const { env: { TABLE_NAME = 'battle' } = {} } = process;
+    const ddb = new DynamoDB();
+    const params = {
+      TableName: TABLE_NAME,
+      Item: {
+        ...state,
+        connectionId,
+      },
+    };
+    await ddb.putItem(params).promise();
+
     const response = {
       statusCode: 200,
-      body: JSON.stringify({ id, state }),
+      body: JSON.stringify({ id }),
     };
     return response;
   } catch (e) {
