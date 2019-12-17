@@ -15,7 +15,7 @@ const handler = async (event) => {
     const { id } = state;
 
     console.log('env', process.env);
-    const { TABLE_NAME = 'KnocketBattles' } = process.env;
+    const { env: { TABLE_NAME = 'KnocketBattles' } = {} } = process;
     const docClient = new DynamoDB.DocumentClient();
     const params = {
       TableName: TABLE_NAME,

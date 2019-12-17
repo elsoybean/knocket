@@ -7,7 +7,7 @@ import builtins from 'rollup-plugin-node-builtins';
 import { terser } from 'rollup-plugin-terser';
 
 const plugins = [
-  builtins({ crypto: false }),
+  builtins({ crypto: false, process: false }),
   resolve({
     preferBuiltins: true,
     browser: false,
@@ -45,7 +45,7 @@ const plugins = [
   }),
   globals(),
 ];
-const external = ['aws-sdk', 'crypto'];
+const external = ['aws-sdk', 'crypto', 'process'];
 
 export default [
   {
