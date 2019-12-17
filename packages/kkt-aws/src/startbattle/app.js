@@ -14,16 +14,17 @@ const handler = async (event) => {
     const state = await startBattle({ gameConfig });
     const { id } = state;
 
-    const { env: { TABLE_NAME = 'KnocketBattles' } = {} } = process;
-    const ddb = new DynamoDB();
+    const { env: { TABLE_NAME = 'knocket-battles' } = {} } = process;
+    const docClient = new DynamoDB.DocumentClient();
     const params = {
       TableName: TABLE_NAME,
       Item: {
-        ...state,
+        id,
         connectionId,
+        state,
       },
     };
-    await ddb.putItem(params).promise();
+    await docClient.put(params).promise();
 
     const response = {
       statusCode: 200,
