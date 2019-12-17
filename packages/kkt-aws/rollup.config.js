@@ -2,7 +2,6 @@
 import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
 import { terser } from 'rollup-plugin-terser';
 
@@ -10,7 +9,6 @@ const plugins = [
   builtins({ crypto: false, process: false }),
   resolve({
     preferBuiltins: true,
-    browser: false,
   }),
   terser(),
   babel({
@@ -43,7 +41,6 @@ const plugins = [
       ],
     ],
   }),
-  globals(),
 ];
 const external = ['aws-sdk', 'crypto', 'process'];
 
