@@ -221,7 +221,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
-          QUEUE_NAME: !Ref StartBattleQueue
+          QUEUE_URL: !Ref StartBattleQueue
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName
