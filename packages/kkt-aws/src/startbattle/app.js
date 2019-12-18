@@ -26,8 +26,9 @@ const publishBattle = async (id) => {
         StringValue: id,
       },
     },
+    MessageDeduplicationId: id,
     MessageGroupId: 'startbattle',
-    MessageBody: JSON.stringify(id),
+    MessageBody: id,
     QueueUrl,
   };
 
