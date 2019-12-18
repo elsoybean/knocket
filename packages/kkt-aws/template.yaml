@@ -221,9 +221,12 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          QUEUE_NAME: !Ref StartBattleQueue
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName
+        - SQSSendMessagePolicy:
+            QueueName: !Ref StartBattleQueue
         - Statement:
             - Effect: Allow
               Action:
@@ -268,6 +271,11 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref MoveBotMessageFunction
       Principal: apigateway.amazonaws.com
+
+  StartBattleQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: True
 
 Outputs:
   ConnectionsTableArn:

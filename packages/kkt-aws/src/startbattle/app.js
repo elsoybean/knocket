@@ -1,6 +1,37 @@
 // @flow
 import { start as startBattle } from 'kkt-battle';
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDB, SQS } from 'aws-sdk';
+
+const saveBattle = async ({ id, state, connectionId }) => {
+  const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
+  const docClient = new DynamoDB.DocumentClient();
+  const params = {
+    TableName,
+    Item: {
+      id,
+      connectionId,
+      state,
+    },
+  };
+  await docClient.put(params).promise();
+};
+
+const publishBattle = async (id) => {
+  const { env: { QUEUE_URL: QueueUrl } = {} } = process;
+  const sqs = new SQS();
+  const params = {
+    MessageAttributes: {
+      BattleId: {
+        DataType: 'String',
+        StringValue: id,
+      },
+    },
+    MessageBody: JSON.stringify(id),
+    QueueUrl,
+  };
+
+  await sqs.sendMessage(params).promise();
+};
 
 const handler = async (event) => {
   const { body = '{}', requestContext: { connectionId } = {} } = event;
@@ -14,18 +45,8 @@ const handler = async (event) => {
     const state = await startBattle({ gameConfig });
     const { id } = state;
 
-    console.log('env', process.env);
-    const { env: { TABLE_NAME = 'KnocketBattles' } = {} } = process;
-    const docClient = new DynamoDB.DocumentClient();
-    const params = {
-      TableName: TABLE_NAME,
-      Item: {
-        id,
-        connectionId,
-        state,
-      },
-    };
-    await docClient.put(params).promise();
+    await saveBattle({ id, state, connectionId });
+    await publishBattle(id);
 
     const response = {
       statusCode: 200,
