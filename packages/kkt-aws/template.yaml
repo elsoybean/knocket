@@ -317,9 +317,9 @@ Outputs:
     Description: 'MoveBotMessage function ARN'
     Value: !GetAtt MoveBotMessageFunction.Arn
 
-  StartBattleFunctionArn:
-    Description: 'StartBattle function ARN'
-    Value: !GetAtt StartBattleFunction.Arn
+  BattleCycleFunctionArn:
+    Description: 'BattleCycle function ARN'
+    Value: !GetAtt BattleCycleFunction.Arn
 
   StartBattleQueueArn:
     Description: 'StartBattleQueue queue ARN'
