@@ -26,7 +26,7 @@ const publishBattle = async (id) => {
         StringValue: id,
       },
     },
-    MessageGroupId: 'startbattle'
+    MessageGroupId: 'startbattle',
     MessageBody: JSON.stringify(id),
     QueueUrl,
   };
