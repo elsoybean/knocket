@@ -272,6 +272,24 @@ Resources:
       FunctionName: !Ref MoveBotMessageFunction
       Principal: apigateway.amazonaws.com
 
+  BattleCycleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lib/battlecycle/
+      Handler: app.handler
+      MemorySize: 128
+      Runtime: nodejs12.x
+      Events:
+        SQS:
+          BatchSize: 1
+          Queue: !Ref StartBattleQueue
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+
   StartBattleQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -297,6 +315,14 @@ Outputs:
   MoveBotMessageFunctionArn:
     Description: 'MoveBotMessage function ARN'
     Value: !GetAtt MoveBotMessageFunction.Arn
+
+  StartBattleFunctionArn:
+    Description: 'StartBattle function ARN'
+    Value: !GetAtt StartBattleFunction.Arn
+
+  StartBattleQueueArn:
+    Description: 'StartBattleQueue queue ARN'
+    Value: !GetAtt StartBattleQueue.Arn
 
   WebSocketURI:
     Description: 'The WSS Protocol URI to connect to'
