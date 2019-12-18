@@ -81,4 +81,13 @@ export default [
       format: 'cjs',
     },
   },
+  {
+    input: 'src/battlecycle/app.js',
+    plugins,
+    external,
+    output: {
+      file: 'lib/battlecycle/app.js',
+      format: 'cjs',
+    },
+  },
 ];
