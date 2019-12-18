@@ -283,7 +283,7 @@ Resources:
         SQSEvent:
           Type: SQS
           Properties:
-            Queue: !Ref StartBattleQueue
+            Queue: !GetAtt StartBattleQueue.Arn
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
