@@ -226,7 +226,7 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName
         - SQSSendMessagePolicy:
-            QueueName: !Ref StartBattleQueue
+            QueueName: !GetAtt StartBattleQueue.QueueName
         - Statement:
             - Effect: Allow
               Action:
