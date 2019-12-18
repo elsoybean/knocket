@@ -65,20 +65,20 @@ class TestEncoderMethods(unittest.TestCase):
             "minor") + e.encode_move({"type": "ahead"})
         self.assertEqual(e.encode_proximity(p), expected)
 
-    def test_encode_range_finder(self):
+    def test_encode_heat_sensor(self):
         e = Encoder()
 
         d = [True, True, False, False, False, False]
         expected = [1, 1, 0, 0, 0, 0]
-        self.assertEqual(e.encode_range_finder(d), expected)
+        self.assertEqual(e.encode_heat_sensor(d), expected)
 
         d = [False, False, False, True, False, False]
         expected = [0, 0, 0, 1, 0, 0]
-        self.assertEqual(e.encode_range_finder(d), expected)
+        self.assertEqual(e.encode_heat_sensor(d), expected)
 
         d = [False, True, False, False, False, False]
         expected = [0, 1, 0, 0, 0, 0]
-        self.assertEqual(e.encode_range_finder(d), expected)
+        self.assertEqual(e.encode_heat_sensor(d), expected)
 
     def test_encode_reading(self):
         e = Encoder()
@@ -91,8 +91,8 @@ class TestEncoderMethods(unittest.TestCase):
             {"type": "none"},
             bot_proximity,
         ], "damage": "minor", "heading": 6, "compass": [False, False, False, False, False, True]}
-        expected = [237 / 2000] + e.encode_proximity({"type": "none"}) + e.encode_proximity({"type": "wall"}) + e.encode_proximity({"type": "none"}) + e.encode_proximity(
-            bot_proximity) + e.encode_damage("minor") + e.encode_heading(6) + e.encode_range_finder([False, False, False, False, False, True])
+        expected = e.encode_proximity({"type": "none"}) + e.encode_proximity({"type": "wall"}) + e.encode_proximity({"type": "none"}) + e.encode_proximity(
+            bot_proximity) + e.encode_damage("minor") + e.encode_heading(6) + e.encode_heat_sensor([False, False, False, False, False, True])
         self.assertEqual(e.encode_reading(d), expected)
 
     def test_encode_action(self):
@@ -115,12 +115,11 @@ class TestEncoderMethods(unittest.TestCase):
     def test_encode_empty(self):
         e = Encoder()
         x = e.encode_state({})
-        print(len(x))
         self.assertTrue(np.array_equal(x, [0] * len(x)))
 
     def test_encoded_state_length(self):
         e = Encoder()
-        self.assertEqual(430, e.encoded_state_length)
+        self.assertEqual(421, e.encoded_state_length)
 
 
 if __name__ == '__main__':

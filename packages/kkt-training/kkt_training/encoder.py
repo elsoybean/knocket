@@ -56,34 +56,35 @@ class Encoder:
         return output
 
     @staticmethod
-    def encode_range_finder(data):  # 6
+    def encode_heat_sensor(data):  # 6
         return [1 if data[i] else 0 for i in range(6)]
 
     @staticmethod
-    def encode_reading(data):  # 1 + 20 + 20 + 20 + 20 + 4 + 6 + 6 = 97
+    def encode_reading(data):  # 20 + 20 + 20 + 20 + 4 + 6 + 6 = 96
         output = []
-        output.append(data.get("elapsed", 0) / Encoder.max_time)
+        #output.append(data.get("elapsed", 0) / Encoder.max_time)
         for i in range(Encoder.proximity_sensors):
             output += Encoder.encode_proximity(data.get("proximity",
                                                         [{}] * Encoder.proximity_sensors)[i])
         output += Encoder.encode_damage(data.get("damage"))
         output += Encoder.encode_heading(data.get("heading"))
-        output += Encoder.encode_range_finder(
+        output += Encoder.encode_heat_sensor(
             data.get("compass", [False]*6))
         return output
 
     @staticmethod
-    def encode_move_history(data):
+    def encode_move_history(data):  # 7 + 7 + 7 + 7 + 7 = 35
         output = []
         for i in range(len(data)):
-            output += [data[i].get("elapsed", 0) / Encoder.max_time] + \
-                Encoder.encode_move(data[i])
+            # output += data[i].get("elapsed", 0) / Encoder.max_time]
+            output += Encoder.encode_move(data[i])
         for i in range(len(data), 5):
-            output += [0] + Encoder.encode_move({})
+            #output += [0]
+            output += Encoder.encode_move({})
         return output
 
     @staticmethod
-    def encode_state(raw_state):  # 97 + 97 + 97 + 97 + 1 + 1
+    def encode_state(raw_state):  # 96 + 96 + 96 + 96 + 1 + 1 + 35 = 421
         output = []
         encoded_reading = Encoder.encode_reading(raw_state)
         output += encoded_reading
@@ -99,7 +100,7 @@ class Encoder:
 
         output += Encoder.encode_move_history(raw_state.get('moveHistory', []))
 
-        return np.array(output)
+        return output
 
     @staticmethod
     def encode_action(action):  # 7

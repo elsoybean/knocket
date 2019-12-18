@@ -5,8 +5,8 @@ warnings.filterwarnings('ignore')  # NOQA: E402
 
 import tensorflow as tf  # NOQA: E402
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # NOQA: E402
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)  # NOQA: E402
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # NOQA: E402
+#tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)  # NOQA: E402
 
 import sys
 import gym
@@ -30,6 +30,8 @@ from .strategy import Attack
 from .strategy import Erratic
 from .strategy import Hunter
 
+models_base_path = './models/dqn_models/'
+
 
 class DQN:
     def __init__(self, model_name):
@@ -50,7 +52,7 @@ class DQN:
         self.epsilon_decay_delay = 100 * avg_steps
 
         self.learning_rate = 0.001
-        self.batch_size = 32
+        self.batch_size = 128
 
         self.steps = 0
         self.tau = 0.125
@@ -59,17 +61,16 @@ class DQN:
         self.bias_against_zero_reward = 1 - (0.007518691 * 3)
 
         # warm up for ~20 trials before we attempt to train at all
-        self.min_memory_length = 20 * \
-            (1 - self.bias_against_zero_reward) * avg_steps
+        self.min_step_before_training = 20 * avg_steps
 
         self.model_name = model_name
-        self.model_base_path = './models/dqn_models/'
         self.model_path = None
 
         self.load_or_create_model()
 
     def load_or_create_model(self):
-        self.model_path = os.path.join(self.model_base_path, self.model_name)
+        global models_base_path
+        self.model_path = os.path.join(models_base_path, self.model_name)
         final_model = os.path.join(self.model_path, "final.model")
         if not os.path.exists(final_model):
             if not os.path.exists(self.model_path):
@@ -97,11 +98,11 @@ class DQN:
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(128, input_dim=self.input_length, activation='relu'))
-        model.add(Dense(48, activation="relu"))
-        model.add(Dense(24, activation="relu"))
+        model.add(Dense(200, input_dim=self.input_length, activation='relu'))
+        # model.add(Dense(128, activation="relu"))
+        # model.add(Dense(32, activation="relu"))
         model.add(Dense(self.output_length, activation='softmax'))
-        model.compile(loss='categorical_crossentropy',
+        model.compile(loss='mean_squared_error',
                       optimizer=Adam(lr=self.learning_rate))
         return model
 
@@ -116,41 +117,48 @@ class DQN:
             return self.predict(state)
 
     def predict(self, state):
-        encoded_state = self.encoder.encode_state(state).reshape(1, -1)
+        encoded_state = np.array(
+            self.encoder.encode_state(state)).reshape(1, -1)
         prediction = self.model.predict(encoded_state)
         return choice(self.encoder.actions, p=prediction[0])
 
     def remember(self, state, action, reward, new_state, done):
         # Discard most zero reward steps
         if reward == 0 and np.random.random_sample() < self.bias_against_zero_reward:
-            return
+            return False
 
-        encoded_state = self.encoder.encode_state(state).reshape(1, -1)
-        encoded_new_state = self.encoder.encode_state(new_state).reshape(1, -1)
+        encoded_state = self.encoder.encode_state(state)
+        encoded_new_state = self.encoder.encode_state(new_state)
         encoded_action = self.encoder.actions.index(action)
         self.memory.append(
             [encoded_state, encoded_action, reward, encoded_new_state, done])
+        return True
 
-    def replay(self):
-        if len(self.memory) < self.batch_size or self.steps < self.min_memory_length:
-            return
-
-        batch_x = np.empty((0, 430), float)
-        batch_y = np.empty((0, 7), float)
-        samples = random.sample(self.memory, self.batch_size)
+    def build_training_batch(self, size):
+        batch_x = np.empty((0, self.input_length), np.int8)
+        batch_y = np.empty((0, 7), np.int8)
+        samples = random.sample(self.memory, size)
         for sample in samples:
-            #pylint: disable=W0633
+            # pylint: disable=W0633
             state, action, reward, new_state, done = sample
-            batch_x = np.vstack((batch_x, state[0]))
-            target = self.target_model.predict(state)
+            batch_x = np.vstack((batch_x, state))
+            target = self.target_model.predict(np.array(state).reshape(1, -1))
             if done:
                 target[0][action] = reward
             else:
                 Q_future = max(self.target_model.predict(
-                    new_state)[0])
+                    np.array(new_state).reshape(1, -1))[0])
                 target[0][action] = reward + Q_future * self.gamma
-            batch_y = np.vstack((batch_y, target[0]))
+                if np.random.random_sample() < 0.01:
+                    print("Action: {:d}, Reward: {:0.4f}, Q: {:0.4f}, T: {:0.4f}".format(
+                        action, reward, Q_future, target[0][action]))
+            batch_y = np.vstack((batch_y, np.array(target)))
+        return batch_x, batch_y
 
+    def replay(self):
+        if len(self.memory) < self.batch_size or self.steps < self.min_step_before_training:
+            return None
+        batch_x, batch_y = self.build_training_batch(self.batch_size)
         return self.model.train_on_batch(batch_x, batch_y)
 
     def target_train(self):
@@ -162,16 +170,20 @@ class DQN:
         self.target_model.set_weights(target_weights)
 
     def ensure_model_path(self):
-        model_path = os.path.join(self.model_base_path, self.model_name)
+        global models_base_path
+        model_path = os.path.join(models_base_path, self.model_name)
         model_inc = 0
         while os.path.exists(model_path):
             model_inc += 1
-            model_path = "{}_{}".format(os.path.join(self.model_base_path,
+            model_path = "{}_{}".format(os.path.join(models_base_path,
                                                      self.model_name), model_inc)
 
         return model_path
 
     def save_model(self, fn):
+        if self.model_name == 'new_model':
+            return
+
         if self.model_path == None:
             self.model_path = self.ensure_model_path()
             print('Creating ' + self.model_path)
@@ -234,19 +246,21 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     strategy_list = [
-        Random(),
-        Weighted({"attack": 2, "ahead": 4, "wait": 0}),
-        Erratic(3),
-        Explorer(),
-        Explorer(),
-        Explorer(),
-        Hunter(),
-        Hunter(),
+        # Random(),
+        # Weighted({"attack": 2, "ahead": 4, "wait": 0}),
+        # Erratic(3),
+        # Explorer(),
         Hunter(),
     ]
 
     trial = 0
     msg = ""
+    loss = None
+    # sanity_batch = 128
+    # sanity_batch_file = os.path.join(models_base_path, 'sanity_batch.json')
+
+    # if not os.path.exists(sanity_batch_file):
+    #     while len(dqn_agent.memory) < sanity_batch:
     while True:
         trial += 1
         verbose = False  # trial != 0 and trial % 100 == 0
@@ -273,14 +287,16 @@ def main():
             action = dqn_agent.act(cur_state, strat)
             new_state, reward, done, _ = env.step(action)
             total_reward += reward
-            dqn_agent.remember(cur_state, action, reward, new_state, done)
+            remembered = dqn_agent.remember(
+                cur_state, action, reward, new_state, done)
 
-            # internally iterates default (prediction) model
-            loss = dqn_agent.replay()
-            if verbose and loss is not None:
-                print(
-                    " - Step {}, Reward: {}, Loss: {:0.2f}".format(steps, reward, loss))
-            dqn_agent.target_train()  # iterates target model
+            if remembered:
+                # internally iterates default (prediction) model
+                loss = dqn_agent.replay()
+                if verbose and loss is not None:
+                    print(
+                        " - Step {}, Reward: {}, Loss: {:0.2f}".format(steps, reward, loss))
+                dqn_agent.target_train()  # iterates target model
 
             cur_state = new_state
             step_rewards = np.append(step_rewards, reward)
@@ -290,17 +306,34 @@ def main():
         if verbose:
             print("Score: {}, Steps: {}".format(reward, steps))
 
-        if trial % 250 == 0 and trial >= 200:
-            print("\nLast Loss: ", loss)
+        if trial % 200 == 0 and trial >= 200:
             print("Testing at Trial {}".format(trial))
             msg = ""
             test()
             dqn_agent.save_model("trial_{}".format(trial))
         elif not verbose:
             sys.stdout.write('\b' * len(msg))
-            msg = "T{:6d} - L = {:0.4f}".format(trial, loss if loss else 9999)
+            msg = "T{:6d} - M{:6d}".format(trial, len(dqn_agent.memory))
+            if loss is not None:
+                msg += " - L = {:0.4f}".format(loss)
+
             sys.stdout.write(msg)
             sys.stdout.flush()
+
+        # with open(sanity_batch_file, 'w') as outfile:
+        #     json.dump(list(dqn_agent.memory), outfile)
+
+    # else:
+    #     with open(sanity_batch_file) as json_file:
+    #         memory = json.load(json_file)
+    #     dqn_agent.memory = deque(memory)
+
+    # while True:
+    #     batch_x, batch_y = dqn_agent.build_training_batch(
+    #         len(dqn_agent.memory))
+    #     loss, acc = dqn_agent.model.train_on_batch(batch_x, batch_y)
+    #     print("Loss: {:0.6f}, Acc: {:0.6f}".format(loss, acc))
+    #     dqn_agent.target_train()
 
     train_end()
 

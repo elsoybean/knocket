@@ -17,7 +17,7 @@ class KnocketEnv(gym.Env):
                                             'explorer',
                                             'facer',
                                             'sentinel',
-                                            'hunter',
+                                            # 'hunter',
                                             'random',
                                             ])
         self.proficiency = kwargs.get('proficiency', [1.0, 0.9, 0.8, 0.7])

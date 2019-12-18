@@ -5,8 +5,8 @@ warnings.filterwarnings('ignore')  # NOQA: E402
 
 import tensorflow as tf  # NOQA: E402
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # NOQA: E402
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)  # NOQA: E402
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # NOQA: E402
+# tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)  # NOQA: E402
 
 import sys
 import gym
@@ -19,6 +19,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import load_model
+from keras.layers import Conv1D
 from random import sample
 from .encoder import Encoder
 import time
@@ -42,12 +43,13 @@ class Basic:
     def build_model(self):
         self.model = Sequential()
         self.model.add(
-            Dense(128, input_dim=self.input_length, activation='relu'))
-        self.model.add(Dense(48, activation="relu"))
-        self.model.add(Dense(24, activation="relu"))
+            Dense(128, input_dim=self.input_length, activation='softmax'))
+        self.model.add(Dense(48, activation='softmax'))
+        self.model.add(Dense(24, activation='softmax'))
         self.model.add(Dense(self.output_length, activation='softmax'))
         self.model.compile(loss='categorical_crossentropy',
-                           optimizer=Adam(lr=self.learning_rate))
+                           optimizer=Adam(lr=self.learning_rate),
+                           metrics=['accuracy'])
         return self.model
 
     def load_training_data(self):
@@ -73,12 +75,25 @@ class Basic:
 
     def train_model(self):
         self.build_model()
-        X = np.array([i[0] for i in self.training_data]
-                     ).reshape(-1, len(self.training_data[0][0]))
-        y = np.array([i[1] for i in self.training_data]
-                     ).reshape(-1, len(self.training_data[0][1]))
 
-        self.model.fit(X, y, epochs=10, batch_size=256)
+        def random_one_hot_labels(shape):
+            n, n_class = shape
+            classes = np.random.randint(0, n_class, n)
+            labels = np.zeros((n, n_class))
+            labels[np.arange(n), classes] = 1
+            return labels
+        # X = np.array([i[0] for i in self.training_data]
+        #              ).reshape(-1, len(self.training_data[0][0]))
+        # y = np.array([i[1] for i in self.training_data]
+        #              ).reshape(-1, len(self.training_data[0][1]))
+
+        X = np.random.random((100, 430))
+        y = random_one_hot_labels((100, 7))
+        ds = tf.data.Dataset.from_tensor_slices((X, y))
+        ds = ds.batch(32)
+        ds = ds.repeat()
+
+        self.model.fit(ds, epochs=100, steps_per_epoch=5000)
 
     def evaluate(self):
         X = np.array([i[0] for i in self.test_data]
@@ -89,7 +104,7 @@ class Basic:
 
     def train(self):
         start = time.time()
-        self.load_training_data()
+        # self.load_training_data()
         end = time.time()
         print('Loading Elapsed Time:', end - start)
 
@@ -99,7 +114,8 @@ class Basic:
         print('Training Elapsed Time:', end - start)
 
         print('Saving ', self.model_path)
-        self.model.save(self.model_path)
+        if self.model_name != 'new_model':
+            self.model.save(self.model_path)
 
         start = time.time()
         loss = self.evaluate()
