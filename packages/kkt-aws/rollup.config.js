@@ -10,7 +10,7 @@ const plugins = [
   resolve({
     preferBuiltins: true,
   }),
-  terser(),
+  //terser(),
   babel({
     exclude: 'node_modules/**',
     babelrc: false,

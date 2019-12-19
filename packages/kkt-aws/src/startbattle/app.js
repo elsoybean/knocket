@@ -41,7 +41,7 @@ const handler = async (event) => {
     const { config: gameConfig = { botConfigs: [] } } = JSON.parse(body);
     gameConfig.botConfigs.push({
       color: 'green',
-      strategy: { type: 'offline', handle: connectionId },
+      strategy: { type: 'offline', options: { handle: connectionId } },
     });
 
     const state = await startBattle({ gameConfig });
