@@ -23,7 +23,7 @@ const plugins = [
   commonjs({
     namedExports: {
       'kkt-battle': ['start'],
-      'kkt-battle-events': ['applyToState'],
+      'kkt-battle-events': ['applyToState', 'battleCycle'],
     },
   }),
   babel({
