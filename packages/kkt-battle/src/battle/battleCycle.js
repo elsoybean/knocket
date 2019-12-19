@@ -5,16 +5,16 @@ import { readSensors, reset } from '../bot';
 //import executeMove from './executeMove';
 //import { applyToState } from 'kkt-battle-events';
 
-import type { GameState, RenderFunction } from '../../types/GameState.types';
+import type { GameState } from '../../types/GameState.types';
 
 const battleCycle = async (
   state: GameState,
-  render: RenderFunction,
+  //render: RenderFunction,
   //events: EventEmitter,
 ) => {
-  if (render) {
-    await render(state);
-  }
+  // if (render) {
+  //   await render(state);
+  // }
 
   const { bots, elapsed } = state;
   const aliveBots = bots.filter((bot) => bot.health > 0);

@@ -2,14 +2,14 @@
 import { start as startBattle } from 'kkt-battle';
 import { DynamoDB, SQS } from 'aws-sdk';
 
-const saveBattle = async ({ id, state, connectionId }) => {
+const saveBattle = async ({ id, state, connectionIds }) => {
   const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
   const docClient = new DynamoDB.DocumentClient();
   const params = {
     TableName,
     Item: {
       id,
-      connectionId,
+      connectionIds,
       state,
     },
   };
@@ -41,13 +41,13 @@ const handler = async (event) => {
     const { config: gameConfig = { botConfigs: [] } } = JSON.parse(body);
     gameConfig.botConfigs.push({
       color: 'green',
-      strategy: { type: 'offline' },
+      strategy: { type: 'offline', handle: connectionId },
     });
 
     const state = await startBattle({ gameConfig });
     const { id } = state;
 
-    await saveBattle({ id, state, connectionId });
+    await saveBattle({ id, state, connectionIds: [connectionId] });
     await publishBattle(id);
 
     const response = {
