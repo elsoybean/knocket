@@ -16,7 +16,12 @@ const battleCycle = async (
   //   await render(state);
   // }
 
-  const { bots, elapsed } = state;
+  const { bots = [], elapsed } = state;
+
+  if (bots.length == 0) {
+    throw new Error('No bots in battle state');
+  }
+
   const aliveBots = bots.filter((bot) => bot.health > 0);
   if (elapsed > 2000) {
     return { result: 'draw', state };
