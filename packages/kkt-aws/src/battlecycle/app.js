@@ -22,8 +22,10 @@ const loadBattle = async (id) => {
 
 exports.handler = async (event) => {
   const { Records = [] } = event;
+  console.log('Starting Battle Cycle', event);
   Records.forEach(async ({ body: id }) => {
     try {
+      console.log('Loading Battle', id);
       const state = await loadBattle(id);
       console.log('Current Battle State', state);
       const result = await battleCycle(state);
