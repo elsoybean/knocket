@@ -16,5 +16,8 @@
     "kkt-battle-events": "1.0.0",
     "kkt-common": "1.0.0"
   },
-  "author": "elsoybean"
+  "author": "elsoybean",
+  "devDependencies": {
+    "flow-bin": "^0.100.0"
+  }
 }

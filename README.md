@@ -13,3 +13,21 @@ Install the following plugins
 - Http Request
 - File Operations
 - NodeJS
+
+Add a NodeJS version
+
+- Manage Jenkins > Global tool configuration
+- Name it `nodejs12.x`
+- Choose any NodeJS 12.x version
+
+Add credentials
+
+- Manage Jenkins > Credentials > System > global
+- Add AWS credentials, id is `knocket-aws`
+
+Create a new Item
+
+- Named `Knocket`
+- Pipeline
+- Pipeline definition: Pipeline script from SCM
+- Script path: `Jenkinsfile`

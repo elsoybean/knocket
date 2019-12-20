@@ -18,5 +18,8 @@
     "dotenv": "^8.2.0",
     "mongodb": "^3.3.0"
   },
-  "author": "elsoybean"
+  "author": "elsoybean",
+  "devDependencies": {
+    "flow-bin": "^0.100.0"
+  }
 }
