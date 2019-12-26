@@ -18,9 +18,9 @@ const battleCycle = async (
 
   const aliveBots = bots.filter((bot) => bot.health > 0);
   if (elapsed > 2000) {
-    broadcastResult({ result: 'draw', state });
+    await broadcastResult({ result: 'draw', state });
   } else if (aliveBots.length == 1) {
-    broadcastResult({ result: 'win', bot: aliveBots[0], state });
+    await broadcastResult({ result: 'win', bot: aliveBots[0], state });
   } else {
     const activeBot = aliveBots.sort((a, b) => a.cooldown - b.cooldown)[0];
     const { cooldown: elapsed, proficiency, strategyConfig } = activeBot;
@@ -39,9 +39,9 @@ const battleCycle = async (
     const move = await strategy(sensorData);
     const { type, options: { handle } = {} } = move;
     if (type === 'collect') {
-      collectMove(handle, sensorData);
+      await collectMove(handle, sensorData);
     } else {
-      publishMove(activeBot, move);
+      await publishMove(activeBot, move);
     }
   }
 };
