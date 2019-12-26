@@ -24,6 +24,7 @@ const plugins = [
     namedExports: {
       'kkt-battle': ['start', 'battleCycle', 'executeMove', 'resume'],
       'kkt-battle-events': ['applyToState'],
+      uuid: ['v4'],
     },
   }),
   babel({
