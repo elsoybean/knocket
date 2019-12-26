@@ -250,17 +250,15 @@ Resources:
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
-      Events:
-        SQSEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt MoveBotQueue.Arn
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          QUEUE_URL: !Ref MoveBotQueue
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt MoveBotQueue.QueueName
         - Statement:
             - Effect: Allow
               Action:
@@ -309,6 +307,34 @@ Resources:
             TableName: !Ref TableName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt MoveBotQueue.QueueName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'execute-api:ManageConnections'
+              Resource:
+                - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${KnocketWebSocket}/*'
+
+  ApplyMoveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lib/applymove/
+      Handler: app.handler
+      MemorySize: 128
+      Runtime: nodejs12.x
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt StartBattleQueue.Arn
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName
+          QUEUE_URL: !Ref StartBattleQueue
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TableName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt StartBattleQueue.QueueName
         - Statement:
             - Effect: Allow
               Action:

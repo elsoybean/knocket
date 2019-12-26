@@ -91,4 +91,13 @@ export default [
       format: 'cjs',
     },
   },
+  {
+    input: 'src/applymove/app.js',
+    plugins,
+    external,
+    output: {
+      file: 'lib/applymove/app.js',
+      format: 'cjs',
+    },
+  },
 ];
