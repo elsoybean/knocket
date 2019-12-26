@@ -325,7 +325,7 @@ Resources:
         SQSEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt StartBattleQueue.Arn
+            Queue: !GetAtt MoveBotQueue.Arn
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
