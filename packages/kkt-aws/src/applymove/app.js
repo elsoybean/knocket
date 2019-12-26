@@ -6,8 +6,10 @@ exports.handler = async (event) => {
   const { Records = [] } = event;
 
   for (const {
+    body,
     body: { battleId, moveId, bot: { id: movingId } = {}, move } = {},
   } of Records) {
+    console.log('Got move to apply', body);
     if (!battleId) {
       console.error('No battle ID; discarding message');
       return;

@@ -7,7 +7,7 @@ const findBattleByConnectionId = async (id: string) => {
   const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
   const params = {
     TableName,
-    FilterExpression: ':connection_id IN connectionIds',
+    FilterExpression: 'contains(connectionIds, :connection_id)',
     ExpressionAttributeValues: { ':connection_id': id },
     AttributesToGet: ['state'],
   };
