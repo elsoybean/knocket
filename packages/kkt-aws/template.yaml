@@ -293,6 +293,18 @@ Resources:
         Variables:
           TABLE_NAME: !Ref TableName
           QUEUE_URL: !Ref MoveBotQueue
+          WS_ENDPOINT:
+            !Join [
+              '',
+              [
+                !Ref KnocketWebSocket,
+                '.execute-api.',
+                !Ref 'AWS::Region',
+                '.amazonaws.com/',
+                !Ref 'Stage',
+              ],
+            ]
+
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName

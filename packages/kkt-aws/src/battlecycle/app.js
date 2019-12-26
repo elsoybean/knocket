@@ -12,7 +12,12 @@ import type {
 import type { Move } from '../../../kkt-battle/types/Move.types';
 
 const docClient = new DynamoDB.DocumentClient();
-const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
+const {
+  env: {
+    TABLE_NAME: TableName = 'KnocketBattles',
+    WS_ENDPOINT: wsEndpoint,
+  } = {},
+} = process;
 
 const loadBattle = async (id: string) => {
   const params = { TableName, Key: { id }, AttributesToGet: ['state'] };
@@ -34,7 +39,7 @@ const collectMove = async (handle: string, sensorData: SensorData) => {
   };
   try {
     console.log('Collecting Move', params);
-    const api = new ApiGatewayManagementApi();
+    const api = new ApiGatewayManagementApi({ endpoint: wsEndpoint });
     await api.postToConnection(params).promise();
   } catch (err) {
     console.error('Error collecting next move from WS', err);
