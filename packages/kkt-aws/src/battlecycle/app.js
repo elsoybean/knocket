@@ -49,6 +49,8 @@ exports.handler = async (event) => {
       const moveMessage = { battleId: id, moveId, bot, move };
       console.log('Publishing Move', moveMessage);
       try {
+        const { color: botColor = '?' } = bot || {};
+        const { type: moveType = '?' } = move || {};
         const { env: { QUEUE_URL: QueueUrl } = {} } = process;
         const sqs = new SQS();
         const params = {
@@ -57,6 +59,18 @@ exports.handler = async (event) => {
               DataType: 'String',
               StringValue: id,
             },
+            MoveId: {
+              DataType: 'String',
+              StringValue: moveId,
+            },
+            BotColor: {
+              DataType: 'String',
+              StringValue: botColor,
+            },
+            MoveType: {
+              DataType: 'String',
+              StringValue: moveType,
+            },
           },
           MessageDeduplicationId: moveId,
           MessageGroupId: 'movebot',
@@ -64,6 +78,7 @@ exports.handler = async (event) => {
           QueueUrl,
         };
         await sqs.sendMessage(params).promise();
+        console.log('Finished publishing message', params);
       } catch (err) {
         console.error('Error publishing move', err);
       }

@@ -2,8 +2,6 @@
 
 import { readSensors, reset, createStrategy } from '../bot';
 import { random as randomStrategy } from '../strategies';
-//import executeMove from './executeMove';
-//import { applyToState } from 'kkt-battle-events';
 
 import type { GameState } from '../../types/GameState.types';
 import type { Move } from '../../types/Move.types';
@@ -11,13 +9,7 @@ import type { Move } from '../../types/Move.types';
 const battleCycle = async (
   state: GameState,
   { collectMove, publishMove, broadcastResult },
-): //render: RenderFunction,
-//events: EventEmitter,
-Promise<Move> => {
-  // if (render) {
-  //   await render(state);
-  // }
-
+): Promise<Move> => {
   const { bots = [], elapsed } = state;
 
   if (bots.length == 0) {
