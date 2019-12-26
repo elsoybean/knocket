@@ -6,12 +6,19 @@ exports.handler = async (event) => {
   const { Records = [] } = event;
 
   for (const {
-    battleId,
-    moveId,
-    bot: { id: movingId } = {},
-    move,
+    body: { battleId, moveId, bot: { id: movingId } = {}, move } = {},
   } of Records) {
+    if (!battleId) {
+      console.error('No battle ID; discarding message');
+      return;
+    }
+
     const state = await loadBattle(battleId);
+    if (!state) {
+      console.error('Could not load battle; discarding message');
+      return;
+    }
+
     const { bots, elapsed } = state;
     const aliveBots = bots.filter((bot) => bot.health > 0);
     const { id: activeId } =
@@ -28,8 +35,9 @@ exports.handler = async (event) => {
         activeId,
         movingId,
       });
-    } else {
-      console.log('Applying move', { movingId, move });
+      return;
     }
+
+    console.log('Applying move', { movingId, move });
   }
 };
