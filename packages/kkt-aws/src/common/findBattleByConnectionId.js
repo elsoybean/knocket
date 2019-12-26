@@ -12,7 +12,7 @@ const findBattleByConnectionId = async (id: string) => {
     AttributesToGet: ['state'],
   };
   try {
-    const result = await docClient.get(params).promise();
+    const result = await docClient.scan(params).promise();
     console.log('Finding by connection', { id, params, result });
     const {
       Items: [{ state }],
