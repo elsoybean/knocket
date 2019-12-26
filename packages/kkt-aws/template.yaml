@@ -250,6 +250,11 @@ Resources:
       Handler: app.handler
       MemorySize: 128
       Runtime: nodejs12.x
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MoveBotQueue.Arn
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
@@ -287,11 +292,17 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TableName
+          QUEUE_URL: !Ref MoveBotQueue
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref TableName
 
   StartBattleQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: True
+
+  MoveBotQueue:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: True

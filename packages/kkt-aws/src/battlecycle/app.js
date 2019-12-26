@@ -1,7 +1,8 @@
 // @flow
 
+import { v4 as uuid } from 'uuid';
 import { battleCycle } from 'kkt-battle';
-import { DynamoDB, ApiGatewayManagementApi } from 'aws-sdk';
+import { DynamoDB, ApiGatewayManagementApi, SQS } from 'aws-sdk';
 
 import type {
   Bot,
@@ -17,7 +18,6 @@ const loadBattle = async (id: string) => {
   const params = { TableName, Key: { id }, AttributesToGet: ['state'] };
   try {
     const result = await docClient.get(params).promise();
-    console.log('Lookup Result', id, result);
     const {
       Item: { state },
     } = result;
@@ -30,7 +30,7 @@ const loadBattle = async (id: string) => {
 const collectMove = async (handle: string, sensorData: SensorData) => {
   const params = {
     ConnectionId: handle,
-    Data: JSON.stringify(sensorData),
+    Data: JSON.stringify({ type: 'collect', sensorData }),
   };
   try {
     console.log('Collecting Move', params);
@@ -41,30 +41,48 @@ const collectMove = async (handle: string, sensorData: SensorData) => {
   }
 };
 
-const publishMove = async (bot: Bot, move: Move) => {
-  console.log('Publishing Move', { bot, move });
-};
-
-const broadcastResult = async ({
-  result,
-  bot,
-  state,
-}: {
-  result: string,
-  bot?: Bot,
-  state: GameState,
-}) => {
-  console.log('Broadcasting Result', { result, bot, state });
-};
-
 exports.handler = async (event) => {
   const { Records = [] } = event;
-  console.log('Starting Battle Cycle', event);
   for (const { body: id } of Records) {
+    const publishMove = async (bot: Bot, move: Move) => {
+      const moveId = uuid();
+      const moveMessage = { battleId: id, moveId, bot, move };
+      console.log('Publishing Move', moveMessage);
+      try {
+        const { env: { QUEUE_URL: QueueUrl } = {} } = process;
+        const sqs = new SQS();
+        const params = {
+          MessageAttributes: {
+            BattleId: {
+              DataType: 'String',
+              StringValue: id,
+            },
+          },
+          MessageDeduplicationId: moveId,
+          MessageGroupId: 'movebot',
+          MessageBody: JSON.stringify(moveMessage),
+          QueueUrl,
+        };
+        await sqs.sendMessage(params).promise();
+      } catch (err) {
+        console.error('Error publishing move', err);
+      }
+    };
+
+    const broadcastResult = async ({
+      result,
+      bot,
+      state,
+    }: {
+      result: string,
+      bot?: Bot,
+      state: GameState,
+    }) => {
+      console.log('Broadcasting Result', { battleId: id, result, bot, state });
+    };
+
     try {
-      console.log('Loading Battle', id);
       const state = await loadBattle(id);
-      console.log('Current Battle State', state);
       await battleCycle(state, {
         collectMove,
         publishMove,
@@ -74,5 +92,4 @@ exports.handler = async (event) => {
       console.error('Error running a battle cycle', id, err);
     }
   }
-  console.log(event);
 };
