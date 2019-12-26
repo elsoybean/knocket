@@ -2,16 +2,15 @@
 
 import * as strategies from '../strategies';
 
-import type EventEmitter from 'events';
-
-const createStrategy = (
+const createStrategy = ({
+  type,
+  options,
+}: {
   type: string,
   options: ?Object,
-  events: EventEmitter,
-): Strategy =>
+}): Strategy =>
   strategies[type]({
     ...options,
-    events,
   });
 
 export default createStrategy;

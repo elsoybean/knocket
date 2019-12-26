@@ -32,7 +32,8 @@ const initializeBot = (
   const position = field[positionNum];
   startPositions.push(positionNum);
 
-  const strategy = createStrategy(strategyType, strategyOptions, events);
+  const strategyConfig = { type: strategyType, options: strategyOptions };
+  const strategy = createStrategy(strategyConfig);
   const cooldown = Math.random();
   const defending = false;
   const health = 99;
@@ -43,7 +44,7 @@ const initializeBot = (
     color,
     defending,
     strategy,
-    strategyConfig: { type: strategyType, options: strategyOptions },
+    strategyConfig,
     proficiency,
     heading,
     position,

@@ -1,6 +1,5 @@
 //@flow
 
-export { default as input } from './input';
 export { default as random } from './random';
 export { default as explorer } from './explorer';
 export { default as streams } from './streams';

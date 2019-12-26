@@ -9,8 +9,8 @@ import type { Move } from '../../types/Move.types';
 
 const resume = async (state: GameState, move: Move): Promise<void> => {
   state.bots.forEach((b) => {
-    const { strategyConfig: { type, options } = {} } = b;
-    b.strategy = createStrategy(type, options);
+    const { strategyConfig } = b;
+    b.strategy = createStrategy(strategyConfig);
   });
 
   if (move) {

@@ -1,18 +1,16 @@
 //@flow
 
-import EventEmitter from 'events';
-
 import type { Move } from '../../types/Move.types';
 
-const offline = ({ events }: { events?: EventEmitter }) => async (
+const offline = ({ handle }: { handle?: string }) => async (
   sensorData: SensorData,
   final: boolean,
 ): Promise<?Move> => {
-  if (!events || final) {
+  if (!handle || final) {
     return;
   }
 
-  events.emit('pause', sensorData);
+  return { type: 'collect', options: { handle, sensorData } };
 };
 
 export default offline;
