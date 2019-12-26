@@ -45,7 +45,7 @@ Promise<Move> => {
         ? createStrategy(strategyConfig)
         : randomStrategy;
     const move = await strategy(sensorData);
-    const { type, options: { handle, sensorData } = {} } = move;
+    const { type, options: { handle } = {} } = move;
     if (type === 'collect') {
       collectMove(handle, sensorData);
     } else {

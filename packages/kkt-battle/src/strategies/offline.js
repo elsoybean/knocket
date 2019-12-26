@@ -10,7 +10,7 @@ const offline = ({ handle }: { handle?: string }) => async (
     return;
   }
 
-  return { type: 'collect', options: { handle, sensorData } };
+  return { type: 'collect', options: { handle } };
 };
 
 export default offline;
