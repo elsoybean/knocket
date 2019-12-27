@@ -20,7 +20,7 @@ const collectMove = async (handle: string, sensorData: SensorData) => {
     Data: JSON.stringify({ type: 'collect', sensorData }),
   };
   try {
-    console.log('Collecting Move', params);
+    console.debug('Collecting Move', params);
     const api = new ApiGatewayManagementApi({ endpoint: wsEndpoint });
     await api.postToConnection(params).promise();
   } catch (err) {

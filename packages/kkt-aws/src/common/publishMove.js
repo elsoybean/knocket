@@ -6,7 +6,7 @@ import { SQS } from 'aws-sdk';
 const publishMove = async ({ battleId, bot, move }) => {
   const moveId = uuid();
   const moveMessage = { battleId, bot, move, moveId };
-  console.log('Publishing Move', moveMessage);
+  console.debug('Publishing Move', moveMessage);
   try {
     const { color: botColor = '?' } = bot || {};
     const { type: moveType = '?' } = move || {};
@@ -37,7 +37,7 @@ const publishMove = async ({ battleId, bot, move }) => {
       QueueUrl,
     };
     await sqs.sendMessage(params).promise();
-    console.log('Finished publishing message', params);
+    console.debug('Finished publishing message', params);
   } catch (err) {
     console.error('Error publishing move', err);
   }

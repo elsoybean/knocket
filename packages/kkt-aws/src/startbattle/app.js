@@ -1,6 +1,7 @@
 // @flow
 import { start as startBattle } from 'kkt-battle';
-import { DynamoDB, SQS } from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
+import publishBattle from '../common/publishBattle';
 
 const saveBattle = async ({ id, state, connectionIds }) => {
   const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
@@ -14,25 +15,6 @@ const saveBattle = async ({ id, state, connectionIds }) => {
     },
   };
   await docClient.put(params).promise();
-};
-
-const publishBattle = async (id) => {
-  const { env: { QUEUE_URL: QueueUrl } = {} } = process;
-  const sqs = new SQS();
-  const params = {
-    MessageAttributes: {
-      BattleId: {
-        DataType: 'String',
-        StringValue: id,
-      },
-    },
-    MessageDeduplicationId: id,
-    MessageGroupId: 'startbattle',
-    MessageBody: id,
-    QueueUrl,
-  };
-
-  await sqs.sendMessage(params).promise();
 };
 
 const handler = async (event) => {

@@ -1,6 +1,24 @@
 // @flow
 
+import { DynamoDB } from 'aws-sdk';
+import { executeMove } from 'kkt-battle';
+import { applyToState } from 'kkt-battle-events';
 import loadBattle from '../common/loadBattle';
+import publishBattle from '../common/publishBattle';
+
+const updateBattleState = async (state) => {
+  const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
+  const docClient = new DynamoDB.DocumentClient();
+  const { id } = state;
+  const params = {
+    TableName,
+    Key: { id },
+    UpdateExpression: 'set #s = :state',
+    ExpressionAttributeNames: { '#s': 'state' },
+    ExpressionAttributeValues: { ':state': state },
+  };
+  await docClient.update(params).promise();
+};
 
 exports.handler = async (event) => {
   const { Records = [] } = event;
@@ -14,8 +32,7 @@ exports.handler = async (event) => {
       return;
     }
 
-    const { battleId, bot: { id: movingId } = {}, move } = parsedBody;
-    console.log('Got move to apply', battleId, body, typeof body);
+    const { battleId, bot, bot: { id: movingId } = {}, move } = parsedBody;
     if (!battleId) {
       console.error('No battle ID; discarding message', battleId);
       return;
@@ -37,7 +54,7 @@ exports.handler = async (event) => {
       !activeId ||
       movingId !== activeId
     ) {
-      console.log('Ignoring move', {
+      console.warn('Ignoring unexpected move', {
         elapsed,
         numAlive: aliveBots.length,
         activeId,
@@ -46,6 +63,10 @@ exports.handler = async (event) => {
       return;
     }
 
-    console.log('Applying move', { movingId, move });
+    console.debug('Applying move', { movingId, move });
+    const historyItem = executeMove(bot, move, state);
+    applyToState(state, historyItem);
+    await updateBattleState(state);
+    await publishBattle(battleId);
   }
 };

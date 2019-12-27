@@ -12,7 +12,6 @@ const findBattleByConnectionId = async (connectionId: string) => {
   };
   try {
     const result = await docClient.scan(params).promise();
-    console.log('Finding by connection', { connectionId, params, result });
     const {
       Items: [{ id, state, connectionIds }],
     } = result;
