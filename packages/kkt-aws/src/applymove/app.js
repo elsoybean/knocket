@@ -7,7 +7,7 @@ exports.handler = async (event) => {
 
   for (const {
     body,
-    body: { battleId, moveId, bot: { id: movingId } = {}, move } = {},
+    body: { battleId, bot: { id: movingId } = {}, move } = {},
   } of Records) {
     console.log('Got move to apply', battleId, body, typeof body);
     if (!battleId) {
@@ -15,7 +15,7 @@ exports.handler = async (event) => {
       return;
     }
 
-    const state = await loadBattle(battleId);
+    const { state } = (await loadBattle(battleId)) || {};
     if (!state) {
       console.error('Could not load battle; discarding message');
       return;

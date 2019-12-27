@@ -9,15 +9,14 @@ const findBattleByConnectionId = async (id: string) => {
     TableName,
     FilterExpression: 'contains(connectionIds, :connection_id)',
     ExpressionAttributeValues: { ':connection_id': id },
-    ProjectionExpression: 'state',
   };
   try {
     const result = await docClient.scan(params).promise();
     console.log('Finding by connection', { id, params, result });
     const {
-      Items: [{ state }],
+      Items: [{ id, state, connectionIds }],
     } = result;
-    return state;
+    return { id, connectionIds, state };
   } catch (err) {
     console.error('Error finding battle', err);
   }

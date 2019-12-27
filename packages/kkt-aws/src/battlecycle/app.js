@@ -1,6 +1,5 @@
 // @flow
 
-import { v4 as uuid } from 'uuid';
 import { battleCycle } from 'kkt-battle';
 import { ApiGatewayManagementApi } from 'aws-sdk';
 import loadBattle from '../common/loadBattle';
@@ -50,12 +49,16 @@ exports.handler = async (event) => {
   const { Records = [] } = event;
   for (const { body: id } of Records) {
     try {
-      const state = await loadBattle(id);
-      await battleCycle(state, {
-        collectMove,
-        publishMove: publishMoveForBattle(id),
-        broadcastResult: broadcastResult(id),
-      });
+      const { state } = (await loadBattle(id)) || {};
+      if (!state) {
+        console.error('Could not load battle', id);
+      } else {
+        await battleCycle(state, {
+          collectMove,
+          publishMove: publishMoveForBattle(id),
+          broadcastResult: broadcastResult(id),
+        });
+      }
     } catch (err) {
       console.error('Error running a battle cycle', id, err);
     }

@@ -9,9 +9,9 @@ const loadBattle = async (id: string) => {
   try {
     const result = await docClient.get(params).promise();
     const {
-      Item: { state },
+      Item: { id, connectionIds, state },
     } = result;
-    return state;
+    return { id, connectionIds, state };
   } catch (err) {
     console.error('Error loading battle', err);
   }

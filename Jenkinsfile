@@ -14,7 +14,11 @@ pipeline {
         }
         stage('Test') {
             steps {
-                echo 'Testing..'
+                nodejs(nodeJSInstallationName:"nodejs12.x") {
+                    sh label: 'Test', script: '''
+                        npm test
+                        '''
+                }
             }
         }
         stage('Deploy AWS CloudFormation') {

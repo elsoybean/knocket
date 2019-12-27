@@ -15,7 +15,8 @@
     "battle:single": "node lib/index.js",
     "battle:trial": "node lib/trial.js",
     "generateTrainingData": "node lib/generateTraining.js",
-    "server": "nodemon --watch lib lib/server.js"
+    "server": "nodemon --watch lib lib/server.js",
+    "test": "npm run lint"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",

@@ -8,7 +8,8 @@
     "dev": "npm run build:watch",
     "lint": "eslint src",
     "generateFlowTypes": "flow-typed install",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "npm run lint"
   },
   "dependencies": {
     "aws-sdk": "^2.591.0",

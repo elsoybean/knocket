@@ -3,14 +3,12 @@
 import { v4 as uuid } from 'uuid';
 import createStrategy from './createStrategy';
 
-import type EventEmitter from 'events';
 import type { Bot, BotConfig, Field } from '../../types/GameState.types';
 
 const initializeBot = (
   field: Field,
   startPositions: Array<int>,
   config: BotConfig,
-  events: EventEmitter,
 ): Bot => {
   const {
     color,

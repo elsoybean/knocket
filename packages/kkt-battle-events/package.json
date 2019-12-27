@@ -11,7 +11,8 @@
     "dev": "npm run build:watch",
     "lint": "eslint src",
     "generateFlowTypes": "flow-typed install",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "npm run lint"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",

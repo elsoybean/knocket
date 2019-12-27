@@ -9,7 +9,7 @@ exports.handler = async (event) => {
     requestContext: { connectionId },
   } = event;
 
-  const state = await findBattleByConnectionId(connectionId);
+  const { state } = (await findBattleByConnectionId(connectionId)) || {};
   if (!state) {
     return {
       statusCode: 400,
