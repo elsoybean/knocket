@@ -2,17 +2,17 @@
 
 import { DynamoDB } from 'aws-sdk';
 
-const findBattleByConnectionId = async (id: string) => {
+const findBattleByConnectionId = async (connectionId: string) => {
   const docClient = new DynamoDB.DocumentClient();
   const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
   const params = {
     TableName,
     FilterExpression: 'contains(connectionIds, :connection_id)',
-    ExpressionAttributeValues: { ':connection_id': id },
+    ExpressionAttributeValues: { ':connection_id': connectionId },
   };
   try {
     const result = await docClient.scan(params).promise();
-    console.log('Finding by connection', { id, params, result });
+    console.log('Finding by connection', { connectionId, params, result });
     const {
       Items: [{ id, state, connectionIds }],
     } = result;

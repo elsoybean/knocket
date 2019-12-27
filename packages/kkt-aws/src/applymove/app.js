@@ -5,10 +5,16 @@ import loadBattle from '../common/loadBattle';
 exports.handler = async (event) => {
   const { Records = [] } = event;
 
-  for (const {
-    body,
-    body: { battleId, bot: { id: movingId } = {}, move } = {},
-  } of Records) {
+  for (const { body } of Records) {
+    let parsedBody = {};
+    try {
+      parsedBody = JSON.parse(body);
+    } catch (err) {
+      console.error('Apply move message is not valid JSON', body);
+      return;
+    }
+
+    const { battleId, bot: { id: movingId } = {}, move } = parsedBody;
     console.log('Got move to apply', battleId, body, typeof body);
     if (!battleId) {
       console.error('No battle ID; discarding message', battleId);
