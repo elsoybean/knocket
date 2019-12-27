@@ -9,9 +9,9 @@ exports.handler = async (event) => {
     body,
     body: { battleId, moveId, bot: { id: movingId } = {}, move } = {},
   } of Records) {
-    console.log('Got move to apply', body);
+    console.log('Got move to apply', battleId, body, typeof body);
     if (!battleId) {
-      console.error('No battle ID; discarding message');
+      console.error('No battle ID; discarding message', battleId);
       return;
     }
 

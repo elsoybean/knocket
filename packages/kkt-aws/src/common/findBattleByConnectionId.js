@@ -9,7 +9,7 @@ const findBattleByConnectionId = async (id: string) => {
     TableName,
     FilterExpression: 'contains(connectionIds, :connection_id)',
     ExpressionAttributeValues: { ':connection_id': id },
-    AttributesToGet: ['state'],
+    ProjectionExpression: 'state',
   };
   try {
     const result = await docClient.scan(params).promise();
