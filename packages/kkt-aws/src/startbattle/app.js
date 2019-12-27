@@ -30,7 +30,7 @@ const handler = async (event) => {
     const { id } = state;
 
     await saveBattle({ id, state, connectionIds: [connectionId] });
-    await publishBattle(id);
+    await publishBattle(state);
 
     const response = {
       statusCode: 200,

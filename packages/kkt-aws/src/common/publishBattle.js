@@ -2,7 +2,7 @@
 
 import { SQS } from 'aws-sdk';
 
-const publishBattle = async (id) => {
+const publishBattle = async ({ id, elapsed }) => {
   const { env: { QUEUE_URL: QueueUrl } = {} } = process;
   try {
     const sqs = new SQS();
@@ -13,7 +13,7 @@ const publishBattle = async (id) => {
           StringValue: id,
         },
       },
-      MessageDeduplicationId: id,
+      MessageDeduplicationId: `${id}-${elapsed}`,
       MessageGroupId: 'startbattle',
       MessageBody: id,
       QueueUrl,

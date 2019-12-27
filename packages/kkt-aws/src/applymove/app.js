@@ -68,7 +68,7 @@ const handleMove = async ({
     applyToState(state, historyItem);
     console.debug('Updated State', state);
     await updateBattleState(state);
-    await publishBattle(battleId);
+    await publishBattle(state);
   } catch (err) {
     console.error('Error handling a move', { err, battleId, move });
   }
