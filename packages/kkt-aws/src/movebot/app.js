@@ -38,4 +38,7 @@ exports.handler = async (event) => {
       : { type: command };
 
   await publishMove({ battleId, bot, move });
+  return {
+    statusCode: 204,
+  };
 };
