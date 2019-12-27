@@ -64,9 +64,7 @@ const handleMove = async ({
 
     console.debug('Applying move', { movingId, move });
     const historyItem = executeMove(bot, move, state);
-    console.debug('History Item', historyItem);
     applyToState(state, historyItem);
-    console.debug('Updated State', state);
     await updateBattleState(state);
     await publishBattle(state);
   } catch (err) {

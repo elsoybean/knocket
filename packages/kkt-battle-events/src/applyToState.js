@@ -18,6 +18,11 @@ const applyToState = (state: GameState, historyItem: HistoryItem) => {
   eventHandlers[type](state, historyItem, bot);
 
   state.elapsed += bot.cooldown;
+  bots.forEach((b) => {
+    if (b.health > 0) {
+      b.cooldown -= bot.cooldown;
+    }
+  });
   bot.cooldown = historyItem.elapsed;
   bot.moveHistory && bot.moveHistory.unshift(historyItem);
   state.history && state.history.unshift(historyItem);
