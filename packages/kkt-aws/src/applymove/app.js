@@ -8,31 +8,30 @@ import publishBattle from '../common/publishBattle';
 
 const updateBattleState = async (state) => {
   const { env: { TABLE_NAME: TableName = 'KnocketBattles' } = {} } = process;
-  const docClient = new DynamoDB.DocumentClient();
-  const { id } = state;
-  const params = {
-    TableName,
-    Key: { id },
-    UpdateExpression: 'set #s = :state',
-    ExpressionAttributeNames: { '#s': 'state' },
-    ExpressionAttributeValues: { ':state': state },
-  };
-  await docClient.update(params).promise();
+  try {
+    const docClient = new DynamoDB.DocumentClient();
+    const { id } = state;
+    const params = {
+      TableName,
+      Key: { id },
+      UpdateExpression: 'set #s = :state',
+      ExpressionAttributeNames: { '#s': 'state' },
+      ExpressionAttributeValues: { ':state': state },
+    };
+    console.debug('Updating battle state', params);
+    await docClient.update(params).promise();
+  } catch (err) {
+    console.error('Error updating battle state', { err, state });
+  }
 };
 
-exports.handler = async (event) => {
-  const { Records = [] } = event;
-
-  for (const { body } of Records) {
-    let parsedBody = {};
-    try {
-      parsedBody = JSON.parse(body);
-    } catch (err) {
-      console.error('Apply move message is not valid JSON', body);
-      return;
-    }
-
-    const { battleId, bot, bot: { id: movingId } = {}, move } = parsedBody;
+const handleMove = async ({
+  battleId,
+  bot,
+  bot: { id: movingId } = {},
+  move,
+}) => {
+  try {
     if (!battleId) {
       console.error('No battle ID; discarding message', battleId);
       return;
@@ -65,8 +64,23 @@ exports.handler = async (event) => {
 
     console.debug('Applying move', { movingId, move });
     const historyItem = executeMove(bot, move, state);
+    console.debug('History Item', historyItem);
     applyToState(state, historyItem);
+    console.debug('Updated State', state);
     await updateBattleState(state);
     await publishBattle(battleId);
+  } catch (err) {
+    console.error('Error handling a move', { err, battleId, move });
+  }
+};
+
+exports.handler = async (event) => {
+  const { Records = [] } = event;
+  for (const { body } of Records) {
+    try {
+      await handleMove(JSON.parse(body));
+    } catch (err) {
+      console.error('Error handling a move message', { err, body });
+    }
   }
 };
