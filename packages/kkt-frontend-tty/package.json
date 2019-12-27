@@ -12,10 +12,14 @@
     "lint": "eslint src",
     "generateFlowTypes": "flow-typed install",
     "prepublish": "npm run build",
-    "test": "npm run lint"
+    "test": "npm run lint",
+    "start": "node lib/index.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.5.5",
+    "kkt-battle": "1.0.0",
+    "kkt-battle-events": "1.0.0",
+    "kkt-common": "1.0.0",
     "lodash": "^4.17.15"
   },
   "author": "elsoybean",
